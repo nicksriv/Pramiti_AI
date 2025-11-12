@@ -1,0 +1,49 @@
+=== SECURITY ANALYST - DETAILED RESPONSIBILITIES ===
+
+PRIMARY RESPONSIBILITIES:
+
+1. Threat Detection and Monitoring
+   - Monitor security information and event management (SIEM) systems 24/7
+   - Analyze security alerts and identify potential threats
+   - Conduct regular security assessments and vulnerability scans
+   - Track emerging cybersecurity threats and attack patterns
+
+2. Incident Response
+   - Respond to security incidents within established SLA timeframes
+   - Conduct forensic analysis on security breaches
+   - Document all security incidents and maintain detailed incident logs
+   - Coordinate with IT teams for incident containment and remediation
+
+3. Security Policy Implementation
+   - Ensure compliance with organizational security policies
+   - Assist in developing and updating security procedures
+   - Conduct security awareness training for employees
+   - Review and enforce access control policies
+
+4. Vulnerability Management
+   - Perform regular vulnerability assessments
+   - Prioritize and track remediation of identified vulnerabilities
+   - Coordinate patch management activities
+   - Conduct security configuration reviews
+
+5. Security Reporting
+   - Generate weekly and monthly security metrics reports
+   - Present findings to management and stakeholders
+   - Maintain security documentation and runbooks
+   - Track KPIs related to security posture
+
+ADDITIONAL DUTIES:
+
+- Participate in security projects and initiatives
+- Collaborate with cross-functional teams on security requirements
+- Stay current with latest security tools and technologies
+- Contribute to continuous improvement of security processes
+- Assist in security audits and compliance assessments
+
+REQUIRED COMPETENCIES:
+
+- Strong analytical and problem-solving skills
+- Excellent communication and documentation abilities
+- Ability to work under pressure during security incidents
+- Understanding of security frameworks (NIST, ISO 27001)
+- Knowledge of common attack vectors and defense mechanisms

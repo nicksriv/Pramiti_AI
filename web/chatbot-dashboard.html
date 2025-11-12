@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pramiti AI - Enhanced Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #667eea;
+            --primary-dark: #5a6fd8;
+            --secondary-color: #764ba2;
+            --background-color: #f8fafc;
+            --surface-color: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+            --success-color: #48bb78;
+            --warning-color: #ed8936;
+            --error-color: #f56565;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            padding: 2rem 0;
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 0 2rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo p {
+            opacity: 0.8;
+            font-size: 0.875rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0 1rem;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface-color);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--surface-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        /* Chat Interface */
+        .chat-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 1.5rem;
+            height: calc(100vh - 200px);
+        }
+
+        .agent-list {
+            background: var(--surface-color);
+            border-radius: 1rem;
+            padding: 1rem;
+            box-shadow: var(--shadow-sm);
+            overflow-y: auto;
+        }
+
+        .agent-item {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .agent-item:hover {
+            background: var(--background-color);
+        }
+
+        .agent-item.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .agent-info h4 {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .agent-info p {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        .chat-window {
+            background: var(--surface-color);
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            background: #f9fafb;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .message.agent .message-avatar,
+        .message.bot .message-avatar {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .message-content {
+            background: white;
+            padding: 1rem;
+            border-radius: 1rem;
+            max-width: 70%;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .message.user .message-content {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .chat-input {
+            padding: 1rem 1.5rem;
+            background: var(--surface-color);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .chat-input-form {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .chat-input-field {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .chat-input-field:focus {
+            border-color: var(--primary-color);
+        }
+
+        .chat-send-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            font-weight: 600;
+        }
+
+        .chat-send-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Agent Management */
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .agent-card {
+            background: var(--surface-color);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .agent-card:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .agent-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            margin-right: 1rem;
+        }
+
+        .agent-name {
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .agent-role {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .agent-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .agent-status.online {
+            background: #d4edda;
+            color: var(--success-color);
+        }
+
+        .agent-status.offline {
+            background: #f8d7da;
+            color: var(--error-color);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            margin-right: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--text-secondary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        /* User Bot Interface */
+        .userbot-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .userbot-intro {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .userbot-intro h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .quick-action {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quick-action:hover {
+            border-color: var(--primary-color);
+            background: var(--background-color);
+        }
+
+        .quick-action i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: static;
+                height: auto;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+
+            .chat-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading States */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: var(--shadow-lg);
+            z-index: 9999;
+            max-width: 350px;
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--error-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>🤖 Pramiti AI</h1>
+                <p>Enhanced Dashboard</p>
+            </div>
+            
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-section="dashboard">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="agent-management">
+                            <i class="fas fa-users"></i>
+                            <span>Agent Management</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="agent-chat">
+                            <i class="fas fa-comments"></i>
+                            <span>Agent Chat</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="user-chatbot">
+                            <i class="fas fa-robot"></i>
+                            <span>User Chatbot</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-section="hierarchy">
+                            <i class="fas fa-sitemap"></i>
+                            <span>Organization</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active">
+                <div class="page-header">
+                    <h1 class="page-title">Dashboard Overview</h1>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="stat-value" id="active-agents">5</div>
+                        <div class="stat-label">Active Agents</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="stat-value" id="total-messages">1,234</div>
+                        <div class="stat-label">Total Messages</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-value" id="avg-response">1.2s</div>
+                        <div class="stat-label">Avg Response Time</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-value" id="system-uptime">99.9%</div>
+                        <div class="stat-label">System Uptime</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🎉 Welcome to Pramiti AI Dashboard!</h3>
+                    <p>Your intelligent IT support organization is ready. Navigate through the sections to:</p>
+                    <ul style="margin: 1rem 0; padding-left: 2rem;">
+                        <li><strong>Chat with Agents:</strong> Test individual AI specialists</li>
+                        <li><strong>User Chatbot:</strong> Experience the end-user interface</li>
+                        <li><strong>Manage Agents:</strong> View and configure your AI team</li>
+                    </ul>
+                    <p>Last updated: <span id="last-update"></span></p>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-primary" onclick="refreshDashboard()">
+                            <i class="fas fa-sync-alt"></i> Refresh Data
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Agent Management Section -->
+            <section id="agent-management" class="content-section">
+                <div class="page-header">
+                    <h1 class="page-title">Agent Management</h1>
+                    <button class="btn btn-primary" onclick="showAddAgentModal()">
+                        <i class="fas fa-plus"></i> Add New Agent
+                    </button>
+                </div>
+
+                <div class="agents-grid" id="agents-container">
+                    <!-- Agents will be loaded here dynamically -->
+                </div>
+            </section>
+
+            <!-- Agent Chat Section -->
+            <section id="agent-chat" class="content-section">
+                <div class="page-header">
+                    <h1 class="page-title">Agent Chat Interface</h1>
+                </div>
+
+                <div class="chat-container">
+                    <div class="agent-list">
+                        <h3 style="margin-bottom: 1rem;">Available Agents</h3>
+                        <div id="chat-agent-list">
+                            <!-- Agent list will be populated here -->
+                        </div>
+                    </div>
+
+                    <div class="chat-window">
+                        <div class="chat-header">
+                            <h3 id="current-agent-name">Select an agent to start chatting</h3>
+                        </div>
+                        
+                        <div class="chat-messages" id="chat-messages">
+                            <div style="text-align: center; color: var(--text-secondary); margin-top: 2rem;">
+                                <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                                <p>Select an agent from the list to start a conversation</p>
+                            </div>
+                        </div>
+                        
+                        <div class="chat-input">
+                            <form class="chat-input-form" id="chat-form">
+                                <input 
+                                    type="text" 
+                                    class="chat-input-field" 
+                                    id="chat-message-input"
+                                    placeholder="Type your message..." 
+                                    disabled
+                                >
+                                <button type="submit" class="chat-send-btn" disabled>
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- User Chatbot Section -->
+            <section id="user-chatbot" class="content-section">
+                <div class="userbot-container">
+                    <div class="userbot-intro">
+                        <h2>🤖 Pramiti Assistant</h2>
+                        <p>Your intelligent IT support companion. I can help with incidents, requests, and general inquiries.</p>
+                    </div>
+
+                    <div class="quick-actions">
+                        <div class="quick-action" onclick="sendQuickMessage('I need to report an incident')">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h4>Report Incident</h4>
+                            <p>Report system issues</p>
+                        </div>
+                        
+                        <div class="quick-action" onclick="sendQuickMessage('I need to request access to a system')">
+                            <i class="fas fa-key"></i>
+                            <h4>Request Access</h4>
+                            <p>Request system access</p>
+                        </div>
+                        
+                        <div class="quick-action" onclick="sendQuickMessage('I want to check my ticket status')">
+                            <i class="fas fa-search"></i>
+                            <h4>Check Status</h4>
+                            <p>Track your requests</p>
+                        </div>
+                        
+                        <div class="quick-action" onclick="sendQuickMessage('I need help with IT policies')">
+                            <i class="fas fa-question-circle"></i>
+                            <h4>Get Help</h4>
+                            <p>General assistance</p>
+                        </div>
+                    </div>
+
+                    <div class="chat-window">
+                        <div class="chat-header">
+                            <h3>💬 Chat with Pramiti</h3>
+                        </div>
+                        
+                        <div class="chat-messages" id="userbot-messages">
+                            <div class="message bot">
+                                <div class="message-avatar">🤖</div>
+                                <div class="message-content">
+                                    <p>Hello! I'm Pramiti, your AI assistant. How can I help you today?</p>
+                                    <div class="message-time" id="bot-time"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="chat-input">
+                            <form class="chat-input-form" id="userbot-form">
+                                <input 
+                                    type="text" 
+                                    class="chat-input-field" 
+                                    id="userbot-message-input"
+                                    placeholder="Type your message to Pramiti..."
+                                >
+                                <button type="submit" class="chat-send-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Hierarchy Section -->
+            <section id="hierarchy" class="content-section">
+                <div class="page-header">
+                    <h1 class="page-title">Organization Hierarchy</h1>
+                    <button class="btn btn-success" onclick="saveHierarchy()">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+
+                <div class="card">
+                    <h3>Organization Structure</h3>
+                    <div id="hierarchy-builder">
+                        <p>Interactive hierarchy builder coming soon! 🏗️</p>
+                        <p>This will allow you to drag and drop agents to build your organization structure.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        // Global variables
+        let currentAgent = null;
+        let agents = [];
+        let userBotSessionId = null;
+
+        // Initialize the application
+        function initializeApp() {
+            setupNavigation();
+            loadAgents();
+            updateTimestamps();
+            
+            // Set up user bot session
+            userBotSessionId = generateSessionId();
+        }
+
+        // Navigation setup
+        function setupNavigation() {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Update active nav
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show corresponding section
+                    const targetSection = this.getAttribute('data-section');
+                    document.querySelectorAll('.content-section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    document.getElementById(targetSection).classList.add('active');
+                });
+            });
+        }
+
+        // Load sample agents for demo
+        function loadAgents() {
+            agents = [
+                {
+                    id: 'ceo',
+                    name: 'CEO Agent',
+                    type: 'executive',
+                    role: 'Chief Executive Officer',
+                    specialization: 'Strategic Leadership',
+                    status: 'online',
+                    icon: 'fas fa-crown'
+                },
+                {
+                    id: 'manager',
+                    name: 'Senior Manager',
+                    type: 'manager',
+                    role: 'ITSM Manager',
+                    specialization: 'Team Management',
+                    status: 'online',
+                    icon: 'fas fa-user-tie'
+                },
+                {
+                    id: 'incident',
+                    name: 'Incident Agent',
+                    type: 'specialist',
+                    role: 'Incident Specialist',
+                    specialization: 'Incident Management',
+                    status: 'online',
+                    icon: 'fas fa-exclamation-triangle'
+                },
+                {
+                    id: 'problem',
+                    name: 'Problem Agent',
+                    type: 'specialist',
+                    role: 'Problem Specialist',
+                    specialization: 'Problem Management',
+                    status: 'online',
+                    icon: 'fas fa-search'
+                },
+                {
+                    id: 'change',
+                    name: 'Change Agent',
+                    type: 'specialist',
+                    role: 'Change Specialist',
+                    specialization: 'Change Management',
+                    status: 'online',
+                    icon: 'fas fa-cogs'
+                }
+            ];
+            renderAgentsGrid();
+            renderChatAgentList();
+        }
+
+        // Render agents grid
+        function renderAgentsGrid() {
+            const container = document.getElementById('agents-container');
+            container.innerHTML = agents.map(agent => `
+                <div class="agent-card">
+                    <div class="agent-header">
+                        <div class="agent-avatar">
+                            <i class="${agent.icon}"></i>
+                        </div>
+                        <div>
+                            <div class="agent-name">${agent.name}</div>
+                            <div class="agent-role">${agent.role}</div>
+                        </div>
+                    </div>
+                    <p><strong>Type:</strong> ${agent.type}</p>
+                    <p><strong>Specialization:</strong> ${agent.specialization}</p>
+                    <div class="agent-status ${agent.status}">${agent.status}</div>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-primary" onclick="editAgent('${agent.id}')">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-secondary" onclick="chatWithAgent('${agent.id}')">
+                            <i class="fas fa-comment"></i> Chat
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render chat agent list
+        function renderChatAgentList() {
+            const container = document.getElementById('chat-agent-list');
+            container.innerHTML = agents.map(agent => `
+                <div class="agent-item" onclick="selectAgent('${agent.id}')">
+                    <div class="agent-info">
+                        <h4><i class="${agent.icon}"></i> ${agent.name}</h4>
+                        <p>${agent.role} • ${agent.status}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Select agent for chat
+        function selectAgent(agentId) {
+            currentAgent = agents.find(a => a.id === agentId);
+            if (!currentAgent) return;
+
+            // Update UI
+            document.querySelectorAll('.agent-item').forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            document.getElementById('current-agent-name').textContent = currentAgent.name;
+            document.getElementById('chat-message-input').disabled = false;
+            document.querySelector('.chat-send-btn').disabled = false;
+            
+            // Load conversation history
+            loadAgentConversation(agentId);
+        }
+
+        // Load agent conversation
+        function loadAgentConversation(agentId) {
+            const messagesContainer = document.getElementById('chat-messages');
+            messagesContainer.innerHTML = `
+                <div class="message agent">
+                    <div class="message-avatar"><i class="${currentAgent.icon}"></i></div>
+                    <div class="message-content">
+                        <p>Hello! I'm ${currentAgent.name}. How can I assist you today?</p>
+                        <div class="message-time">${new Date().toLocaleTimeString()}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Send message to agent
+        function sendMessageToAgent(message) {
+            if (!currentAgent || !message.trim()) return;
+
+            // Add user message to chat
+            addMessageToChat('user', message, 'chat-messages');
+
+            // Simulate agent response
+            setTimeout(() => {
+                const simulatedResponse = generateAgentResponse(message);
+                addMessageToChat('agent', simulatedResponse, 'chat-messages');
+            }, 1000);
+        }
+
+        // Generate simulated agent response
+        function generateAgentResponse(userMessage) {
+            const responses = {
+                executive: [
+                    "I'll review this from a strategic perspective and coordinate with the appropriate teams.",
+                    "This requires executive attention. Let me ensure proper resource allocation.",
+                    "I'll evaluate the organizational impact and provide guidance on next steps."
+                ],
+                manager: [
+                    "I'll coordinate with my team to address this efficiently.",
+                    "Let me assign the right specialists to handle this request.",
+                    "I'll monitor progress and ensure timely resolution."
+                ],
+                specialist: [
+                    "I'll investigate this issue using my specialized knowledge and tools.",
+                    "Based on my expertise, I recommend the following approach...",
+                    "I'll handle this according to established procedures and best practices."
+                ]
+            };
+
+            const agentResponses = responses[currentAgent.type] || responses.specialist;
+            return agentResponses[Math.floor(Math.random() * agentResponses.length)];
+        }
+
+        // Send message to user bot
+        function sendMessageToUserBot(message) {
+            if (!message.trim()) return;
+
+            // Add user message
+            addMessageToChat('user', message, 'userbot-messages');
+
+            // Simulate bot response
+            setTimeout(() => {
+                const simulatedResponse = generateUserBotResponse(message);
+                addMessageToChat('bot', simulatedResponse, 'userbot-messages');
+            }, 1000);
+        }
+
+        // Generate user bot response
+        function generateUserBotResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('incident') || lowerMessage.includes('problem') || lowerMessage.includes('issue')) {
+                return "I understand you're experiencing an issue. I've created incident ticket INC-2025" + Math.floor(Math.random() * 10000) + " and assigned it to our technical team. Can you provide more details about the problem?";
+            } else if (lowerMessage.includes('access') || lowerMessage.includes('permission') || lowerMessage.includes('request')) {
+                return "I can help you with access requests. I've created service request REQ-2025" + Math.floor(Math.random() * 10000) + ". Please specify what system or resource you need access to, and I'll route it to the appropriate approver.";
+            } else if (lowerMessage.includes('status') || lowerMessage.includes('check') || lowerMessage.includes('ticket')) {
+                return "Let me check your recent tickets... I found 2 active tickets: INC-20251110-001 (In Progress) and REQ-20251109-002 (Approved, pending implementation). Would you like details on any specific ticket?";
+            } else {
+                return "I'm here to help with your IT needs! I can assist with incident reporting, service requests, access requests, and status updates. What would you like help with today?";
+            }
+        }
+
+        // Add message to chat
+        function addMessageToChat(type, message, containerId) {
+            const container = document.getElementById(containerId);
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            let avatar;
+            if (type === 'user') {
+                avatar = '👤';
+            } else if (type === 'bot') {
+                avatar = '🤖';
+            } else if (currentAgent) {
+                avatar = `<i class="${currentAgent.icon}"></i>`;
+            } else {
+                avatar = '🤖';
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div class="message-content">
+                    <p>${message}</p>
+                    <div class="message-time">${new Date().toLocaleTimeString()}</div>
+                </div>
+            `;
+            
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Chat form handlers
+        document.getElementById('chat-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-message-input');
+            const message = input.value.trim();
+            if (message) {
+                sendMessageToAgent(message);
+                input.value = '';
+            }
+        });
+
+        document.getElementById('userbot-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const input = document.getElementById('userbot-message-input');
+            const message = input.value.trim();
+            if (message) {
+                sendMessageToUserBot(message);
+                input.value = '';
+            }
+        });
+
+        // Quick message for user bot
+        function sendQuickMessage(message) {
+            document.getElementById('userbot-message-input').value = message;
+            sendMessageToUserBot(message);
+            document.getElementById('userbot-message-input').value = '';
+        }
+
+        // Utility functions
+        function generateSessionId() {
+            return 'session_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function updateTimestamps() {
+            const now = new Date().toLocaleString();
+            document.getElementById('last-update').textContent = now;
+            const botTimeElement = document.getElementById('bot-time');
+            if (botTimeElement) {
+                botTimeElement.textContent = new Date().toLocaleTimeString();
+            }
+        }
+
+        function refreshDashboard() {
+            updateTimestamps();
+            showNotification('Dashboard refreshed successfully!', 'success');
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <p>${message}</p>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Placeholder functions for future implementation
+        function showAddAgentModal() {
+            showNotification('Add Agent modal - Coming Soon!', 'success');
+        }
+
+        function editAgent(agentId) {
+            showNotification(`Edit agent ${agentId} - Coming Soon!`, 'success');
+        }
+
+        function chatWithAgent(agentId) {
+            // Switch to agent chat section
+            document.querySelector('[data-section="agent-chat"]').click();
+            // Select the agent
+            setTimeout(() => {
+                selectAgent(agentId);
+            }, 100);
+        }
+
+        function saveHierarchy() {
+            showNotification('Hierarchy saved successfully!', 'success');
+        }
+
+        // Initialize timestamps on load
+        updateTimestamps();
+        
+        // Refresh timestamps every 30 seconds
+        setInterval(updateTimestamps, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+# Minimal requirements for basic functionality
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+
+# Database Support
+sqlalchemy==2.0.23
+
+# HTTP and API
+httpx==0.25.2
+requests==2.31.0
+
+# Data Processing
+python-dateutil==2.8.2
+
+# Configuration and Environment
+python-dotenv==1.0.0
+
+# Additional Utilities
+click==8.1.7
+rich==13.7.0
