@@ -336,20 +336,20 @@ CHANGE MANAGEMENT EXPERTISE:
                     }
                 )
                 
-                if cascade_result["cascaded"]:
-                    print(f"⬆️  Cascading to {cascade_result['final_model']} (reason: {cascade_result['cascade_reason']})")
+                if cascade_result.get("should_cascade", False):
+                    print(f"⬆️  Cascading to {cascade_result['next_model']} (reason: {cascade_result['reason']})")
                     
                     # Re-run with better model
                     response = await asyncio.to_thread(
                         self.openai_client.chat.completions.create,
-                        model=cascade_result["final_model"],
+                        model=cascade_result["next_model"],
                         messages=messages,
                         temperature=self.ai_config.temperature,
                         max_tokens=self.ai_config.max_tokens
                     )
                     
                     ai_response = response.choices[0].message.content
-                    selected_model = cascade_result["final_model"]
+                    selected_model = cascade_result["next_model"]
                     needs_cascade = True
                     
                     self.routing_stats["cascaded_queries"] += 1
