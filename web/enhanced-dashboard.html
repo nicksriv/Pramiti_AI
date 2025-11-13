@@ -3902,6 +3902,15 @@
         // Configuration - Automatically detect API URL based on current location
         const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:${window.location.port || '8084'}`;
         
+        // Debug: Log API URL
+        console.log('🔧 API Base URL:', API_BASE_URL);
+        console.log('🔧 Location details:', {
+            protocol: window.location.protocol,
+            hostname: window.location.hostname,
+            port: window.location.port,
+            href: window.location.href
+        });
+        
         // Sidebar Toggle Function
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
@@ -4278,7 +4287,13 @@
         // Load Agents
         async function loadAgents() {
             try {
+                console.log('📡 Fetching agents from:', `${API_BASE_URL}/agents?include_disabled=true`);
                 const response = await fetch(`${API_BASE_URL}/agents?include_disabled=true`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const agents = await response.json();
                 
                 console.log('✓ Loaded agents:', agents);
@@ -4330,7 +4345,13 @@
         // Load Hierarchy
         async function loadHierarchy() {
             try {
+                console.log('📡 Fetching hierarchy from:', `${API_BASE_URL}/api/v1/agents/hierarchy`);
                 const response = await fetch(`${API_BASE_URL}/api/v1/agents/hierarchy`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const hierarchy = await response.json();
                 
                 console.log('✓ Loaded hierarchy:', hierarchy);
@@ -4345,7 +4366,13 @@
         // Load KPIs
         async function loadKPIs() {
             try {
+                console.log('📡 Fetching KPIs from:', `${API_BASE_URL}/api/v1/dashboard/kpis`);
                 const response = await fetch(`${API_BASE_URL}/api/v1/dashboard/kpis`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const kpis = await response.json();
                 
                 console.log('✓ Loaded KPIs:', kpis);
@@ -4373,7 +4400,13 @@
         // Load Blockchain Logs
         async function loadBlockchainLogs() {
             try {
+                console.log('📡 Fetching blockchain logs from:', `${API_BASE_URL}/api/v1/blockchain/logs?limit=50`);
                 const response = await fetch(`${API_BASE_URL}/api/v1/blockchain/logs?limit=50`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const data = await response.json();
                 
                 console.log('✓ Loaded blockchain logs:', data);
