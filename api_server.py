@@ -1401,12 +1401,15 @@ async def delete_organization(org_id: str):
 @app.get("/api/v1/routing/global-stats")
 async def get_global_routing_stats():
     """Get global routing statistics"""
+    # Count enabled agents
+    active_count = sum(1 for agent_id in agents.keys() if agent_status.get(agent_id, True))
+    
     return {
         "total_requests": 0,
         "successful_routes": 0,
         "failed_routes": 0,
         "average_response_time": 0,
-        "active_agents": len([a for a in agents if a.get("enabled", True)]),
+        "active_agents": active_count,
         "total_agents": len(agents),
         "load_distribution": {},
         "peak_hours": [],
@@ -1416,8 +1419,7 @@ async def get_global_routing_stats():
 @app.get("/api/v1/agents/{agent_id}/routing-stats")
 async def get_agent_routing_stats(agent_id: str):
     """Get routing statistics for a specific agent"""
-    agent = next((a for a in agents if a["id"] == agent_id), None)
-    if not agent:
+    if agent_id not in agents:
         raise HTTPException(status_code=404, detail="Agent not found")
     
     return {
