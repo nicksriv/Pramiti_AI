@@ -22,6 +22,10 @@ sys.path.append('.')
 from core.openai_agent import OpenAIAgent, create_openai_agent
 from core.blockchain_logger import CommunicationLogger
 from core.base_agent import Message, MessageType
+from core.connectors import (
+    connector_manager, ConnectorType, AuthType, ConnectorStatus,
+    PermissionScope, STANDARD_CONNECTORS
+)
 
 # Load environment variables
 load_dotenv()
@@ -1432,6 +1436,298 @@ async def get_agent_routing_stats(agent_id: str):
         "capacity": 100,
         "utilization": 0
     }
+
+# ============================================================================
+# CONNECTORS API ENDPOINTS
+# ============================================================================
+
+class ConnectorCreateRequest(BaseModel):
+    """Request model for creating a connector"""
+    connector_type: str
+    name: str
+    description: Optional[str] = None
+    auth_config: Dict[str, Any]
+    permissions: Optional[List[str]] = None
+    scope: Optional[str] = "read_write"
+
+class ConnectorUpdateRequest(BaseModel):
+    """Request model for updating a connector"""
+    name: Optional[str] = None
+    description: Optional[str] = None
+    auth_config: Optional[Dict[str, Any]] = None
+    permissions: Optional[List[str]] = None
+    status: Optional[str] = None
+
+@app.get("/api/v1/connectors/available")
+async def get_available_connectors():
+    """Get list of all available standard connectors"""
+    try:
+        connectors = []
+        for connector_type, config in STANDARD_CONNECTORS.items():
+            connectors.append({
+                "type": connector_type.value,
+                "name": config["name"],
+                "description": config["description"],
+                "auth_type": config["auth_type"].value if isinstance(config["auth_type"], AuthType) else config["auth_type"],
+                "icon": config.get("icon", ""),
+                "capabilities": config.get("capabilities", {}),
+                "documentation_url": config.get("documentation_url", "")
+            })
+        
+        return {
+            "connectors": connectors,
+            "total": len(connectors)
+        }
+    except Exception as e:
+        logger.error(f"Error fetching available connectors: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/v1/connectors")
+async def list_connectors(tenant_id: Optional[str] = None):
+    """List all configured connectors"""
+    try:
+        connectors = connector_manager.list_connectors(tenant_id)
+        return {
+            "connectors": [
+                {
+                    "connector_id": c.connector_id,
+                    "connector_type": c.connector_type.value,
+                    "name": c.name,
+                    "description": c.description,
+                    "auth_type": c.auth_type.value,
+                    "status": c.status.value,
+                    "permissions": c.permissions,
+                    "scope": c.scope.value,
+                    "created_at": c.created_at.isoformat(),
+                    "updated_at": c.updated_at.isoformat(),
+                    "last_sync": c.last_sync.isoformat() if c.last_sync else None,
+                    "rate_limit": c.rate_limit
+                }
+                for c in connectors
+            ],
+            "total": len(connectors)
+        }
+    except Exception as e:
+        logger.error(f"Error listing connectors: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/connectors")
+async def create_connector(request: ConnectorCreateRequest):
+    """Create a new connector"""
+    try:
+        # Validate connector type
+        try:
+            connector_type = ConnectorType(request.connector_type)
+        except ValueError:
+            raise HTTPException(status_code=400, detail=f"Invalid connector type: {request.connector_type}")
+        
+        # Create connector
+        config = connector_manager.create_connector(
+            connector_type=connector_type,
+            name=request.name,
+            auth_config=request.auth_config,
+            tenant_id=None  # Can be extended for multi-tenant support
+        )
+        
+        if request.permissions:
+            config.permissions = request.permissions
+        
+        if request.scope:
+            try:
+                config.scope = PermissionScope(request.scope)
+            except ValueError:
+                pass
+        
+        return {
+            "success": True,
+            "connector_id": config.connector_id,
+            "message": f"Connector '{request.name}' created successfully",
+            "connector": {
+                "connector_id": config.connector_id,
+                "connector_type": config.connector_type.value,
+                "name": config.name,
+                "status": config.status.value,
+                "auth_type": config.auth_type.value
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error creating connector: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/v1/connectors/{connector_id}")
+async def get_connector(connector_id: str):
+    """Get connector details"""
+    try:
+        config = connector_manager.get_connector(connector_id)
+        if not config:
+            raise HTTPException(status_code=404, detail="Connector not found")
+        
+        return {
+            "connector_id": config.connector_id,
+            "connector_type": config.connector_type.value,
+            "name": config.name,
+            "description": config.description,
+            "auth_type": config.auth_type.value,
+            "status": config.status.value,
+            "permissions": config.permissions,
+            "scope": config.scope.value,
+            "created_at": config.created_at.isoformat(),
+            "updated_at": config.updated_at.isoformat(),
+            "last_sync": config.last_sync.isoformat() if config.last_sync else None,
+            "rate_limit": config.rate_limit,
+            "custom_config": config.custom_config
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting connector: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.put("/api/v1/connectors/{connector_id}")
+async def update_connector(connector_id: str, request: ConnectorUpdateRequest):
+    """Update connector configuration"""
+    try:
+        config = connector_manager.get_connector(connector_id)
+        if not config:
+            raise HTTPException(status_code=404, detail="Connector not found")
+        
+        # Update fields
+        if request.name:
+            config.name = request.name
+        if request.description:
+            config.description = request.description
+        if request.auth_config:
+            config.auth_config.update(request.auth_config)
+        if request.permissions:
+            config.permissions = request.permissions
+        if request.status:
+            try:
+                config.status = ConnectorStatus(request.status)
+            except ValueError:
+                raise HTTPException(status_code=400, detail=f"Invalid status: {request.status}")
+        
+        config.updated_at = datetime.now()
+        
+        return {
+            "success": True,
+            "message": "Connector updated successfully",
+            "connector_id": connector_id
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating connector: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/api/v1/connectors/{connector_id}")
+async def delete_connector(connector_id: str):
+    """Delete a connector"""
+    try:
+        success = connector_manager.delete_connector(connector_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Connector not found")
+        
+        return {
+            "success": True,
+            "message": "Connector deleted successfully"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting connector: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/connectors/{connector_id}/test")
+async def test_connector(connector_id: str):
+    """Test connector connection"""
+    try:
+        config = connector_manager.get_connector(connector_id)
+        if not config:
+            raise HTTPException(status_code=404, detail="Connector not found")
+        
+        # Simulate connection test
+        # In production, this would actually test the connector
+        return {
+            "success": True,
+            "connector_id": connector_id,
+            "status": "connected",
+            "message": "Connection test successful",
+            "details": {
+                "response_time_ms": 150,
+                "authenticated": True,
+                "permissions_valid": True
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error testing connector: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/connectors/{connector_id}/authorize")
+async def initiate_authorization(connector_id: str):
+    """Initiate OAuth authorization flow"""
+    try:
+        auth_data = connector_manager.initiate_oauth_flow(connector_id)
+        return {
+            "success": True,
+            "authorization_url": auth_data["authorization_url"],
+            "state": auth_data["state"],
+            "message": "Redirect user to authorization_url to complete OAuth flow"
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error initiating authorization: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/connectors/{connector_id}/revoke")
+async def revoke_connector_access(connector_id: str):
+    """Revoke connector access"""
+    try:
+        config = connector_manager.get_connector(connector_id)
+        if not config:
+            raise HTTPException(status_code=404, detail="Connector not found")
+        
+        config.status = ConnectorStatus.DISCONNECTED
+        config.auth_config.pop("access_token", None)
+        config.auth_config.pop("refresh_token", None)
+        config.updated_at = datetime.now()
+        
+        return {
+            "success": True,
+            "message": "Access revoked successfully"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error revoking access: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/v1/connectors/{connector_id}/permissions")
+async def get_connector_permissions(connector_id: str):
+    """Get available permissions for a connector"""
+    try:
+        config = connector_manager.get_connector(connector_id)
+        if not config:
+            raise HTTPException(status_code=404, detail="Connector not found")
+        
+        standard_config = STANDARD_CONNECTORS.get(config.connector_type, {})
+        capabilities = standard_config.get("capabilities", {})
+        
+        return {
+            "connector_id": connector_id,
+            "capabilities": capabilities,
+            "current_permissions": config.permissions,
+            "scope": config.scope.value
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting permissions: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn

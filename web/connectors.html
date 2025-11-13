@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connectors - Pramiti AI</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        .connectors-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .connector-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .connector-tab {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .connector-tab:hover {
+            color: var(--primary-color);
+        }
+
+        .connector-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .connectors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .connector-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .connector-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .connector-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .connector-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+        }
+
+        .connector-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .connector-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .connector-info h3 {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .connector-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-connected {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .status-disconnected {
+            background: rgba(156, 163, 175, 0.1);
+            color: #9ca3af;
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .status-pending {
+            background: rgba(251, 191, 36, 0.1);
+            color: #fbbf24;
+        }
+
+        .connector-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .connector-capabilities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .capability-badge {
+            padding: 0.25rem 0.75rem;
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary-color);
+            border-radius: 8px;
+            font-size: 0.75rem;
+        }
+
+        .connector-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .auth-fields {
+            background: rgba(102, 126, 234, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: auto;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .connected-connectors-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .connected-connector-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .connector-details {
+            flex: 1;
+        }
+
+        .connector-meta {
+            display: flex;
+            gap: 2rem;
+            margin-top: 0.75rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(102, 126, 234, 0.1);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .custom-connector-section {
+            background: var(--card-bg);
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .custom-connector-section:hover {
+            border-color: var(--primary-color);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .custom-connector-section h3 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .custom-connector-section p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="connectors-container">
+        <div class="page-header">
+            <h1>🔌 Connectors</h1>
+            <p>Integrate with standard enterprise tools and custom applications. All integrations follow OAuth 2.0, API key authentication, and enterprise security protocols.</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="connector-tabs">
+            <button class="connector-tab active" data-tab="available">Available Connectors</button>
+            <button class="connector-tab" data-tab="connected">Connected (0)</button>
+            <button class="connector-tab" data-tab="custom">Custom Integrations</button>
+        </div>
+
+        <!-- Available Connectors Tab -->
+        <div id="available" class="tab-content active">
+            <div id="availableConnectorsLoading" class="loading">
+                <div class="spinner"></div>
+            </div>
+            <div id="availableConnectorsGrid" class="connectors-grid" style="display: none;"></div>
+        </div>
+
+        <!-- Connected Connectors Tab -->
+        <div id="connected" class="tab-content">
+            <div id="connectedConnectorsList" class="connected-connectors-list"></div>
+            <div id="noConnectedConnectors" class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                </svg>
+                <h3>No Connected Integrations</h3>
+                <p>Connect to your favorite tools to enable AI agents to read and write data</p>
+            </div>
+        </div>
+
+        <!-- Custom Integrations Tab -->
+        <div id="custom" class="tab-content">
+            <div class="info-box">
+                <p><strong>🔒 Security First:</strong> Custom integrations support OAuth 2.0, API keys, JWT tokens, and custom authentication. All credentials are encrypted at rest and in transit.</p>
+            </div>
+
+            <div class="custom-connector-section" onclick="openCustomConnectorModal()">
+                <h3>➕ Create Custom Integration</h3>
+                <p>Build custom connectors for your proprietary systems or APIs</p>
+                <button class="btn btn-primary">Get Started</button>
+            </div>
+
+            <div id="customConnectorsList" style="margin-top: 2rem;"></div>
+        </div>
+    </div>
+
+    <!-- Setup Connector Modal -->
+    <div id="setupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Setup Connector</h2>
+                <button class="close-modal" onclick="closeSetupModal()">&times;</button>
+            </div>
+
+            <form id="connectorSetupForm" onsubmit="handleConnectorSetup(event)">
+                <input type="hidden" id="connectorType" name="connector_type">
+                
+                <div class="form-group">
+                    <label>Connector Name</label>
+                    <input type="text" id="connectorName" name="name" required placeholder="e.g., Production Teams Instance">
+                </div>
+
+                <div class="form-group">
+                    <label>Description (Optional)</label>
+                    <textarea id="connectorDescription" name="description" placeholder="Brief description of this connector"></textarea>
+                </div>
+
+                <div id="authFieldsContainer" class="auth-fields">
+                    <!-- Auth fields will be dynamically inserted here -->
+                </div>
+
+                <div class="form-group">
+                    <label>Permissions</label>
+                    <div id="permissionsCheckboxes" class="checkbox-group">
+                        <!-- Permission checkboxes will be dynamically inserted -->
+                    </div>
+                </div>
+
+                <div class="connector-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <span>🔌</span> Connect
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeSetupModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Custom Connector Modal -->
+    <div id="customConnectorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create Custom Connector</h2>
+                <button class="close-modal" onclick="closeCustomConnectorModal()">&times;</button>
+            </div>
+
+            <form id="customConnectorForm" onsubmit="handleCustomConnector(event)">
+                <div class="form-group">
+                    <label>Integration Name</label>
+                    <input type="text" name="name" required placeholder="e.g., Internal CRM System">
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea name="description" required placeholder="What does this integration do?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Authentication Type</label>
+                    <select name="auth_type" id="customAuthType" onchange="updateCustomAuthFields()">
+                        <option value="api_key">API Key</option>
+                        <option value="oauth2">OAuth 2.0</option>
+                        <option value="basic_auth">Basic Auth</option>
+                        <option value="jwt">JWT Token</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+
+                <div id="customAuthFields" class="auth-fields">
+                    <!-- Custom auth fields will be dynamically inserted -->
+                </div>
+
+                <div class="form-group">
+                    <label>Base URL</label>
+                    <input type="url" name="base_url" required placeholder="https://api.example.com">
+                </div>
+
+                <div class="connector-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <span>✨</span> Create Connector
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeCustomConnectorModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.location.origin;
+        let availableConnectors = [];
+        let connectedConnectors = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setupTabs();
+            loadAvailableConnectors();
+            loadConnectedConnectors();
+        });
+
+        function setupTabs() {
+            document.querySelectorAll('.connector-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.dataset.tab;
+                    
+                    // Update tabs
+                    document.querySelectorAll('.connector-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Update content
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    document.getElementById(tabName).classList.add('active');
+                });
+            });
+        }
+
+        async function loadAvailableConnectors() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/connectors/available`);
+                const data = await response.json();
+                
+                availableConnectors = data.connectors;
+                renderAvailableConnectors(availableConnectors);
+            } catch (error) {
+                console.error('Error loading connectors:', error);
+            }
+        }
+
+        function renderAvailableConnectors(connectors) {
+            const grid = document.getElementById('availableConnectorsGrid');
+            const loading = document.getElementById('availableConnectorsLoading');
+            
+            loading.style.display = 'none';
+            grid.style.display = 'grid';
+            
+            grid.innerHTML = connectors.map(connector => `
+                <div class="connector-card" onclick="openSetupModal('${connector.type}')">
+                    <div class="connector-header">
+                        <div class="connector-icon">
+                            ${getConnectorIcon(connector.type)}
+                        </div>
+                        <div class="connector-info">
+                            <h3>${connector.name}</h3>
+                            <span class="connector-status status-disconnected">Not Connected</span>
+                        </div>
+                    </div>
+                    <p class="connector-description">${connector.description}</p>
+                    <div class="connector-capabilities">
+                        ${Object.entries(connector.capabilities || {})
+                            .filter(([_, enabled]) => enabled)
+                            .map(([cap]) => `<span class="capability-badge">${formatCapability(cap)}</span>`)
+                            .join('')}
+                    </div>
+                    <div class="connector-actions">
+                        <button class="btn btn-primary" onclick="event.stopPropagation(); openSetupModal('${connector.type}')">
+                            Setup
+                        </button>
+                        <button class="btn btn-secondary" onclick="event.stopPropagation(); window.open('${connector.documentation_url}', '_blank')">
+                            Docs
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadConnectedConnectors() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/connectors`);
+                const data = await response.json();
+                
+                connectedConnectors = data.connectors || [];
+                renderConnectedConnectors(connectedConnectors);
+                updateConnectedTab();
+            } catch (error) {
+                console.error('Error loading connected connectors:', error);
+            }
+        }
+
+        function renderConnectedConnectors(connectors) {
+            const list = document.getElementById('connectedConnectorsList');
+            const empty = document.getElementById('noConnectedConnectors');
+            
+            if (connectors.length === 0) {
+                list.style.display = 'none';
+                empty.style.display = 'block';
+                return;
+            }
+            
+            list.style.display = 'flex';
+            empty.style.display = 'none';
+            
+            list.innerHTML = connectors.map(connector => `
+                <div class="connected-connector-item">
+                    <div class="connector-details">
+                        <div class="connector-header" style="margin-bottom: 0.5rem;">
+                            <div class="connector-icon">
+                                ${getConnectorIcon(connector.connector_type)}
+                            </div>
+                            <div class="connector-info">
+                                <h3>${connector.name}</h3>
+                                <span class="connector-status status-${connector.status}">${connector.status.replace('_', ' ').toUpperCase()}</span>
+                            </div>
+                        </div>
+                        <div class="connector-meta">
+                            <span>🔒 ${connector.auth_type.toUpperCase()}</span>
+                            <span>📅 Connected: ${new Date(connector.created_at).toLocaleDateString()}</span>
+                            <span>🔄 Last Sync: ${connector.last_sync ? new Date(connector.last_sync).toLocaleString() : 'Never'}</span>
+                        </div>
+                    </div>
+                    <div class="connector-actions">
+                        <button class="btn btn-secondary" onclick="testConnector('${connector.connector_id}')">
+                            Test
+                        </button>
+                        <button class="btn btn-danger" onclick="revokeConnector('${connector.connector_id}')">
+                            Revoke
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateConnectedTab() {
+            const tab = document.querySelector('.connector-tab[data-tab="connected"]');
+            tab.textContent = `Connected (${connectedConnectors.length})`;
+        }
+
+        function openSetupModal(connectorType) {
+            const connector = availableConnectors.find(c => c.type === connectorType);
+            if (!connector) return;
+            
+            document.getElementById('modalTitle').textContent = `Setup ${connector.name}`;
+            document.getElementById('connectorType').value = connectorType;
+            document.getElementById('connectorName').value = connector.name;
+            
+            // Generate auth fields based on auth type
+            const authContainer = document.getElementById('authFieldsContainer');
+            authContainer.innerHTML = generateAuthFields(connector.auth_type);
+            
+            // Generate permissions checkboxes
+            const permContainer = document.getElementById('permissionsCheckboxes');
+            permContainer.innerHTML = generatePermissionCheckboxes(connector.capabilities);
+            
+            document.getElementById('setupModal').classList.add('active');
+        }
+
+        function closeSetupModal() {
+            document.getElementById('setupModal').classList.remove('active');
+            document.getElementById('connectorSetupForm').reset();
+        }
+
+        function generateAuthFields(authType) {
+            switch (authType) {
+                case 'oauth2':
+                    return `
+                        <h4 style="margin-bottom: 1rem;">OAuth 2.0 Configuration</h4>
+                        <div class="form-group">
+                            <label>Client ID</label>
+                            <input type="text" name="client_id" required placeholder="Your OAuth client ID">
+                        </div>
+                        <div class="form-group">
+                            <label>Client Secret</label>
+                            <input type="password" name="client_secret" required placeholder="Your OAuth client secret">
+                        </div>
+                        <div class="form-group">
+                            <label>Redirect URI</label>
+                            <input type="url" name="redirect_uri" required value="${window.location.origin}/oauth/callback">
+                        </div>
+                    `;
+                case 'api_key':
+                    return `
+                        <h4 style="margin-bottom: 1rem;">API Key Configuration</h4>
+                        <div class="form-group">
+                            <label>API Key</label>
+                            <input type="password" name="api_key" required placeholder="Your API key">
+                        </div>
+                    `;
+                default:
+                    return '<p>Authentication will be configured in the next step.</p>';
+            }
+        }
+
+        function generatePermissionCheckboxes(capabilities) {
+            const permissions = Object.entries(capabilities || {})
+                .filter(([_, enabled]) => enabled)
+                .map(([cap]) => `
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="permissions" value="${cap}" checked>
+                        ${formatCapability(cap)}
+                    </label>
+                `).join('');
+            
+            return permissions || '<p>No specific permissions required.</p>';
+        }
+
+        async function handleConnectorSetup(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const authConfig = {};
+            const permissions = [];
+            
+            // Collect auth fields
+            for (let [key, value] of formData.entries()) {
+                if (key === 'permissions') {
+                    permissions.push(value);
+                } else if (!['name', 'description', 'connector_type'].includes(key)) {
+                    authConfig[key] = value;
+                }
+            }
+            
+            const payload = {
+                connector_type: formData.get('connector_type'),
+                name: formData.get('name'),
+                description: formData.get('description'),
+                auth_config: authConfig,
+                permissions: permissions
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/connectors`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('✅ Connector created successfully!');
+                    closeSetupModal();
+                    loadConnectedConnectors();
+                } else {
+                    alert('❌ Error: ' + (data.detail || 'Failed to create connector'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error creating connector');
+            }
+        }
+
+        async function testConnector(connectorId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/connectors/${connectorId}/test`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`✅ Connection test successful!\n\nResponse time: ${data.details.response_time_ms}ms\nAuthenticated: ${data.details.authenticated ? 'Yes' : 'No'}`);
+                } else {
+                    alert('❌ Connection test failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error testing connector');
+            }
+        }
+
+        async function revokeConnector(connectorId) {
+            if (!confirm('Are you sure you want to revoke access to this connector?')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/connectors/${connectorId}/revoke`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ Access revoked successfully');
+                    loadConnectedConnectors();
+                } else {
+                    alert('❌ Error revoking access');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error revoking access');
+            }
+        }
+
+        function openCustomConnectorModal() {
+            document.getElementById('customConnectorModal').classList.add('active');
+            updateCustomAuthFields();
+        }
+
+        function closeCustomConnectorModal() {
+            document.getElementById('customConnectorModal').classList.remove('active');
+            document.getElementById('customConnectorForm').reset();
+        }
+
+        function updateCustomAuthFields() {
+            const authType = document.getElementById('customAuthType').value;
+            const container = document.getElementById('customAuthFields');
+            container.innerHTML = generateAuthFields(authType);
+        }
+
+        async function handleCustomConnector(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const authConfig = {};
+            
+            for (let [key, value] of formData.entries()) {
+                if (!['name', 'description', 'auth_type', 'base_url'].includes(key)) {
+                    authConfig[key] = value;
+                }
+            }
+            
+            authConfig.base_url = formData.get('base_url');
+            
+            const payload = {
+                connector_type: 'custom',
+                name: formData.get('name'),
+                description: formData.get('description'),
+                auth_config: authConfig,
+                permissions: ['read_write']
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/connectors`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('✅ Custom connector created successfully!');
+                    closeCustomConnectorModal();
+                    loadConnectedConnectors();
+                } else {
+                    alert('❌ Error: ' + (data.detail || 'Failed to create custom connector'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error creating custom connector');
+            }
+        }
+
+        function getConnectorIcon(type) {
+            const icons = {
+                'microsoft_teams': '👥',
+                'slack': '💬',
+                'google_drive': '📁',
+                'google_workspace': '🔗',
+                'jira': '📋',
+                'servicenow': '🎫',
+                'zendesk': '💡',
+                'confluence': '📝',
+                'sharepoint': '📚',
+                'onedrive': '☁️',
+                'dropbox': '📦',
+                'github': '🐙',
+                'gitlab': '🦊',
+                'salesforce': '☁️',
+                'custom': '⚙️'
+            };
+            return icons[type] || '🔌';
+        }
+
+        function formatCapability(cap) {
+            return cap.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+    </script>
+</body>
+</html>
