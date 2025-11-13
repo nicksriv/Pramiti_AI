@@ -27,7 +27,7 @@ class AIAgentConfig:
     temperature: float = 0.7
     max_tokens: int = 1000
     system_prompt: str = ""
-    specialization_prompts: Dict[str, str] = None
+    specialization_prompts: Optional[Dict[str, str]] = None
     
     def __post_init__(self):
         if self.specialization_prompts is None:
@@ -44,8 +44,8 @@ class OpenAIAgent(BaseAgent):
                  name: str,
                  role: AgentRole,
                  specialization: str = "",
-                 blockchain_logger: CommunicationLogger = None,
-                 ai_config: AIAgentConfig = None,
+                 blockchain_logger: Optional[CommunicationLogger] = None,
+                 ai_config: Optional[AIAgentConfig] = None,
                  use_model_router: bool = True,
                  tenant_id: Optional[str] = None):
         
@@ -53,6 +53,9 @@ class OpenAIAgent(BaseAgent):
         
         # Store tenant ID for multi-tenant isolation
         self.tenant_id = tenant_id
+        
+        # Initialize metadata dictionary for custom attributes
+        self.metadata: Dict[str, Any] = {}
         
         # Initialize OpenAI client
         self.openai_client = openai.OpenAI(
@@ -322,6 +325,7 @@ CHANGE MANAGEMENT EXPERTISE:
             # Check if cascading is needed (for cascading router)
             needs_cascade = False
             if (self.use_model_router and 
+                self.model_router is not None and
                 hasattr(self.model_router, 'route_with_cascade') and
                 selected_model == "gpt-4o-mini"):
                 
@@ -485,10 +489,11 @@ Respond in a structured format."""
         if len(self.conversation_history) > 20:
             self.conversation_history = self.conversation_history[-20:]
 
-    def get_blockchain_audit_trail(self, message_id: str = None) -> Dict[str, Any]:
+    def get_blockchain_audit_trail(self, message_id: Optional[str] = None) -> Dict[str, Any]:
         """Get blockchain audit trail for this agent or specific message"""
         if message_id:
-            return self.blockchain_logger.get_audit_trail(message_id)
+            result = self.blockchain_logger.get_audit_trail(message_id)
+            return result if result is not None else {}
         else:
             # Get recent communication history for this agent
             recent_history = self.blockchain_logger.get_communication_history(
@@ -581,7 +586,7 @@ Respond in a structured format."""
 
 # Factory function to create specialized agents
 def create_openai_agent(agent_type: str, agent_id: str, name: str, 
-                       blockchain_logger: CommunicationLogger = None,
+                       blockchain_logger: Optional[CommunicationLogger] = None,
                        use_model_router: bool = True,
                        tenant_id: Optional[str] = None) -> OpenAIAgent:
     """Factory function to create pre-configured OpenAI agents with model routing"""

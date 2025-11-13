@@ -28,7 +28,7 @@ class TenantConfig:
     max_monthly_budget: Optional[float] = None  # USD
     
     # Feature flags
-    features: Dict[str, bool] = field(default_factory=lambda: {
+    features: Dict[str, Any] = field(default_factory=lambda: {
         'blockchain_logging': True,
         'advanced_analytics': False,
         'custom_models': False,
