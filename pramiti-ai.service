@@ -1,0 +1,25 @@
+[Unit]
+Description=Pramiti AI Organization Platform
+After=network.target
+
+[Service]
+Type=simple
+User=pramiti
+Group=pramiti
+WorkingDirectory=/home/pramiti/Pramiti_AI
+Environment="PATH=/home/pramiti/Pramiti_AI/venv/bin"
+ExecStart=/home/pramiti/Pramiti_AI/venv/bin/python3 -m uvicorn api_server:app --host 0.0.0.0 --port 8084 --workers 4
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/pramiti-ai/app.log
+StandardError=append:/var/log/pramiti-ai/error.log
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/pramiti/Pramiti_AI /var/log/pramiti-ai
+
+[Install]
+WantedBy=multi-user.target

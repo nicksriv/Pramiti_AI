@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # Pramiti AI Application
+  pramiti-ai:
+    build: .
+    container_name: pramiti-ai
+    ports:
+      - "8084:8084"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HOST=0.0.0.0
+      - PORT=8084
+      - ENVIRONMENT=production
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - DATABASE_URL=${DATABASE_URL:-}
+    volumes:
+      - ./logs:/var/log/pramiti-ai
+      - ./data:/app/data
+    restart: unless-stopped
+    networks:
+      - pramiti-network
+    depends_on:
+      - postgres
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # PostgreSQL Database (Optional)
+  postgres:
+    image: postgres:15-alpine
+    container_name: pramiti-postgres
+    environment:
+      - POSTGRES_DB=pramiti_ai
+      - POSTGRES_USER=pramiti_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - pramiti-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pramiti_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache (Optional)
+  redis:
+    image: redis:7-alpine
+    container_name: pramiti-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - pramiti-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: pramiti-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./web:/usr/share/nginx/html:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - nginx-logs:/var/log/nginx
+    restart: unless-stopped
+    networks:
+      - pramiti-network
+    depends_on:
+      - pramiti-ai
+
+volumes:
+  postgres-data:
+  redis-data:
+  nginx-logs:
+
+networks:
+  pramiti-network:
+    driver: bridge
