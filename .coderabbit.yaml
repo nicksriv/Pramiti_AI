@@ -1,0 +1,216 @@
+# CodeRabbit Configuration for Pramiti AI
+# AI-Powered Code Review Settings
+
+# Language settings
+language: en-US
+
+# Review settings
+reviews:
+  # Enable automatic reviews on commits
+  auto_review: true
+  
+  # Review level of detail
+  # Options: basic, standard, detailed, comprehensive
+  level: comprehensive
+  
+  # Enable inline comments on code
+  inline_comments: true
+  
+  # Request changes for critical issues
+  request_changes_workflow: true
+  
+  # Review entire files or just changes
+  scope: changes
+  
+  # Enable AI-powered suggestions
+  ai_suggestions: true
+
+# Focus areas for AI reviews
+focus_areas:
+  - security          # Security vulnerabilities
+  - performance       # Performance issues
+  - best_practices    # Code best practices
+  - bugs              # Potential bugs
+  - code_quality      # Code quality issues
+  - maintainability   # Code maintainability
+  - documentation     # Documentation quality
+  - testing           # Test coverage
+
+# Python-specific settings
+python:
+  # Python version
+  version: "3.11"
+  
+  # Enable type checking
+  type_checking: true
+  
+  # PEP 8 compliance
+  pep8_compliance: true
+  
+  # Docstring style
+  docstring_style: google
+  
+  # Check for common Python anti-patterns
+  check_anti_patterns: true
+
+# File patterns to review
+include:
+  - "**/*.py"
+  - "**/*.js"
+  - "**/*.html"
+  - "**/*.css"
+  - "**/*.yml"
+  - "**/*.yaml"
+  - "**/Dockerfile*"
+  - "**/*.sh"
+
+# File patterns to exclude from reviews
+exclude:
+  - "**/__pycache__/**"
+  - "**/*.pyc"
+  - "**/node_modules/**"
+  - "**/.git/**"
+  - "**/.venv/**"
+  - "**/venv/**"
+  - "**/*.min.js"
+  - "**/*.min.css"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/.pytest_cache/**"
+  - "**/.mypy_cache/**"
+
+# Security scanning
+security:
+  enabled: true
+  check_secrets: true
+  check_dependencies: true
+  severity_threshold: medium
+
+# Performance analysis
+performance:
+  enabled: true
+  check_complexity: true
+  max_complexity: 10
+  check_memory_leaks: true
+
+# Code quality thresholds
+quality:
+  min_code_coverage: 70
+  max_function_length: 50
+  max_file_length: 500
+  max_parameters: 5
+
+# Documentation requirements
+documentation:
+  require_docstrings: true
+  require_inline_comments: false
+  check_readme: true
+  check_api_docs: true
+
+# Testing requirements
+testing:
+  require_tests: true
+  min_test_coverage: 70
+  check_test_quality: true
+
+# Custom rules for FastAPI
+fastapi:
+  check_async_endpoints: true
+  check_type_hints: true
+  check_response_models: true
+  check_error_handling: true
+
+# OpenAI integration specific checks
+ai_integration:
+  check_api_key_security: true
+  check_rate_limiting: true
+  check_error_handling: true
+  check_token_management: true
+
+# Docker/Deployment checks
+deployment:
+  check_dockerfile_best_practices: true
+  check_security_vulnerabilities: true
+  check_environment_variables: true
+
+# Git settings
+git:
+  # Automatically review on push
+  auto_review_on_push: true
+  
+  # Review pull requests
+  review_pull_requests: true
+  
+  # Minimum files changed to trigger review
+  min_files_changed: 1
+
+# Notification settings
+notifications:
+  # Enable notifications for reviews
+  enabled: true
+  
+  # Notify on critical issues only
+  critical_only: false
+  
+  # Notification channels
+  channels:
+    - vscode      # VS Code notifications
+    - inline      # Inline code comments
+
+# AI model preferences
+ai_model:
+  # Preferred model for reviews
+  # Options: gpt-4, gpt-4-turbo, gpt-3.5-turbo
+  preferred: gpt-4
+  
+  # Enable deep learning analysis
+  deep_analysis: true
+  
+  # Context window size
+  context_lines: 10
+
+# Custom review prompts
+custom_prompts:
+  - "Check for proper error handling in async functions"
+  - "Verify OpenAI API calls have proper timeout handling"
+  - "Ensure database connections are properly closed"
+  - "Check for SQL injection vulnerabilities"
+  - "Verify environment variables are validated"
+  - "Check blockchain logging implementation"
+
+# Integration settings
+integrations:
+  github:
+    enabled: true
+    auto_merge_approved: false
+    require_approval: true
+  
+  vscode:
+    enabled: true
+    show_inline_suggestions: true
+    auto_fix_on_save: false
+
+# Reporting
+reports:
+  # Generate review summary
+  generate_summary: true
+  
+  # Include metrics
+  include_metrics: true
+  
+  # Report format
+  format: markdown
+
+# Advanced settings
+advanced:
+  # Enable experimental features
+  experimental_features: false
+  
+  # Cache reviews for faster processing
+  cache_enabled: true
+  
+  # Maximum review time (seconds)
+  max_review_time: 300
+  
+  # Parallel processing
+  parallel_reviews: true
