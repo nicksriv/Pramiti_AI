@@ -283,13 +283,15 @@ CHANGE MANAGEMENT EXPERTISE:
             if self.use_model_router and self.model_router:
                 routing_result = self.model_router.route_to_model(
                     query=user_content,
-                    conversation_history=self.conversation_history,
-                    user_role=self.role.value
+                    context={
+                        "conversation_history": self.conversation_history,
+                        "user_role": self.role.value
+                    }
                 )
                 
                 selected_model = routing_result["model"]
                 complexity = routing_result["complexity"]
-                confidence = routing_result["confidence"]
+                confidence = routing_result.get("confidence", 0.8)
                 
                 print(f"🎯 Router selected {selected_model} (complexity: {complexity}, confidence: {confidence})")
                 
@@ -324,11 +326,14 @@ CHANGE MANAGEMENT EXPERTISE:
                 selected_model == "gpt-4o-mini"):
                 
                 # Check cascade conditions
-                cascade_result = self.model_router.route_with_cascade(
+                cascade_result = await self.model_router.route_with_cascade(
                     query=user_content,
                     initial_response=ai_response,
-                    conversation_history=self.conversation_history,
-                    user_role=self.role.value
+                    confidence=confidence,
+                    context={
+                        "conversation_history": self.conversation_history,
+                        "user_role": self.role.value
+                    }
                 )
                 
                 if cascade_result["cascaded"]:
