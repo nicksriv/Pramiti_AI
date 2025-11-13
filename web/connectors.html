@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -400,7 +401,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .info-box {
@@ -443,11 +446,13 @@
         }
     </style>
 </head>
+
 <body>
     <div class="connectors-container">
         <div class="page-header">
             <h1>🔌 Connectors</h1>
-            <p>Integrate with standard enterprise tools and custom applications. All integrations follow OAuth 2.0, API key authentication, and enterprise security protocols.</p>
+            <p>Integrate with standard enterprise tools and custom applications. All integrations follow OAuth 2.0, API
+                key authentication, and enterprise security protocols.</p>
         </div>
 
         <!-- Tabs -->
@@ -470,7 +475,8 @@
             <div id="connectedConnectorsList" class="connected-connectors-list"></div>
             <div id="noConnectedConnectors" class="empty-state">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                 </svg>
                 <h3>No Connected Integrations</h3>
                 <p>Connect to your favorite tools to enable AI agents to read and write data</p>
@@ -480,7 +486,8 @@
         <!-- Custom Integrations Tab -->
         <div id="custom" class="tab-content">
             <div class="info-box">
-                <p><strong>🔒 Security First:</strong> Custom integrations support OAuth 2.0, API keys, JWT tokens, and custom authentication. All credentials are encrypted at rest and in transit.</p>
+                <p><strong>🔒 Security First:</strong> Custom integrations support OAuth 2.0, API keys, JWT tokens, and
+                    custom authentication. All credentials are encrypted at rest and in transit.</p>
             </div>
 
             <div class="custom-connector-section" onclick="openCustomConnectorModal()">
@@ -503,15 +510,17 @@
 
             <form id="connectorSetupForm" onsubmit="handleConnectorSetup(event)">
                 <input type="hidden" id="connectorType" name="connector_type">
-                
+
                 <div class="form-group">
                     <label>Connector Name</label>
-                    <input type="text" id="connectorName" name="name" required placeholder="e.g., Production Teams Instance">
+                    <input type="text" id="connectorName" name="name" required
+                        placeholder="e.g., Production Teams Instance">
                 </div>
 
                 <div class="form-group">
                     <label>Description (Optional)</label>
-                    <textarea id="connectorDescription" name="description" placeholder="Brief description of this connector"></textarea>
+                    <textarea id="connectorDescription" name="description"
+                        placeholder="Brief description of this connector"></textarea>
                 </div>
 
                 <div id="authFieldsContainer" class="auth-fields">
@@ -578,7 +587,8 @@
                     <button type="submit" class="btn btn-primary">
                         <span>✨</span> Create Connector
                     </button>
-                    <button type="button" class="btn btn-secondary" onclick="closeCustomConnectorModal()">Cancel</button>
+                    <button type="button" class="btn btn-secondary"
+                        onclick="closeCustomConnectorModal()">Cancel</button>
                 </div>
             </form>
         </div>
@@ -600,11 +610,11 @@
             document.querySelectorAll('.connector-tab').forEach(tab => {
                 tab.addEventListener('click', () => {
                     const tabName = tab.dataset.tab;
-                    
+
                     // Update tabs
                     document.querySelectorAll('.connector-tab').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
-                    
+
                     // Update content
                     document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
                     document.getElementById(tabName).classList.add('active');
@@ -616,7 +626,7 @@
             try {
                 const response = await fetch(`${API_BASE_URL}/api/v1/connectors/available`);
                 const data = await response.json();
-                
+
                 availableConnectors = data.connectors;
                 renderAvailableConnectors(availableConnectors);
             } catch (error) {
@@ -627,10 +637,10 @@
         function renderAvailableConnectors(connectors) {
             const grid = document.getElementById('availableConnectorsGrid');
             const loading = document.getElementById('availableConnectorsLoading');
-            
+
             loading.style.display = 'none';
             grid.style.display = 'grid';
-            
+
             grid.innerHTML = connectors.map(connector => `
                 <div class="connector-card" onclick="openSetupModal('${connector.type}')">
                     <div class="connector-header">
@@ -645,9 +655,9 @@
                     <p class="connector-description">${connector.description}</p>
                     <div class="connector-capabilities">
                         ${Object.entries(connector.capabilities || {})
-                            .filter(([_, enabled]) => enabled)
-                            .map(([cap]) => `<span class="capability-badge">${formatCapability(cap)}</span>`)
-                            .join('')}
+                    .filter(([_, enabled]) => enabled)
+                    .map(([cap]) => `<span class="capability-badge">${formatCapability(cap)}</span>`)
+                    .join('')}
                     </div>
                     <div class="connector-actions">
                         <button class="btn btn-primary" onclick="event.stopPropagation(); openSetupModal('${connector.type}')">
@@ -665,7 +675,7 @@
             try {
                 const response = await fetch(`${API_BASE_URL}/api/v1/connectors`);
                 const data = await response.json();
-                
+
                 connectedConnectors = data.connectors || [];
                 renderConnectedConnectors(connectedConnectors);
                 updateConnectedTab();
@@ -677,16 +687,16 @@
         function renderConnectedConnectors(connectors) {
             const list = document.getElementById('connectedConnectorsList');
             const empty = document.getElementById('noConnectedConnectors');
-            
+
             if (connectors.length === 0) {
                 list.style.display = 'none';
                 empty.style.display = 'block';
                 return;
             }
-            
+
             list.style.display = 'flex';
             empty.style.display = 'none';
-            
+
             list.innerHTML = connectors.map(connector => `
                 <div class="connected-connector-item">
                     <div class="connector-details">
@@ -725,19 +735,19 @@
         function openSetupModal(connectorType) {
             const connector = availableConnectors.find(c => c.type === connectorType);
             if (!connector) return;
-            
+
             document.getElementById('modalTitle').textContent = `Setup ${connector.name}`;
             document.getElementById('connectorType').value = connectorType;
             document.getElementById('connectorName').value = connector.name;
-            
+
             // Generate auth fields based on auth type
             const authContainer = document.getElementById('authFieldsContainer');
             authContainer.innerHTML = generateAuthFields(connector.auth_type);
-            
+
             // Generate permissions checkboxes
             const permContainer = document.getElementById('permissionsCheckboxes');
             permContainer.innerHTML = generatePermissionCheckboxes(connector.capabilities);
-            
+
             document.getElementById('setupModal').classList.add('active');
         }
 
@@ -786,17 +796,17 @@
                         ${formatCapability(cap)}
                     </label>
                 `).join('');
-            
+
             return permissions || '<p>No specific permissions required.</p>';
         }
 
         async function handleConnectorSetup(event) {
             event.preventDefault();
-            
+
             const formData = new FormData(event.target);
             const authConfig = {};
             const permissions = [];
-            
+
             // Collect auth fields
             for (let [key, value] of formData.entries()) {
                 if (key === 'permissions') {
@@ -805,7 +815,7 @@
                     authConfig[key] = value;
                 }
             }
-            
+
             const payload = {
                 connector_type: formData.get('connector_type'),
                 name: formData.get('name'),
@@ -813,16 +823,16 @@
                 auth_config: authConfig,
                 permissions: permissions
             };
-            
+
             try {
                 const response = await fetch(`${API_BASE_URL}/api/v1/connectors`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     alert('✅ Connector created successfully!');
                     closeSetupModal();
@@ -841,9 +851,9 @@
                 const response = await fetch(`${API_BASE_URL}/api/v1/connectors/${connectorId}/test`, {
                     method: 'POST'
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     alert(`✅ Connection test successful!\n\nResponse time: ${data.details.response_time_ms}ms\nAuthenticated: ${data.details.authenticated ? 'Yes' : 'No'}`);
                 } else {
@@ -857,14 +867,14 @@
 
         async function revokeConnector(connectorId) {
             if (!confirm('Are you sure you want to revoke access to this connector?')) return;
-            
+
             try {
                 const response = await fetch(`${API_BASE_URL}/api/v1/connectors/${connectorId}/revoke`, {
                     method: 'POST'
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     alert('✅ Access revoked successfully');
                     loadConnectedConnectors();
@@ -895,18 +905,18 @@
 
         async function handleCustomConnector(event) {
             event.preventDefault();
-            
+
             const formData = new FormData(event.target);
             const authConfig = {};
-            
+
             for (let [key, value] of formData.entries()) {
                 if (!['name', 'description', 'auth_type', 'base_url'].includes(key)) {
                     authConfig[key] = value;
                 }
             }
-            
+
             authConfig.base_url = formData.get('base_url');
-            
+
             const payload = {
                 connector_type: 'custom',
                 name: formData.get('name'),
@@ -914,16 +924,16 @@
                 auth_config: authConfig,
                 permissions: ['read_write']
             };
-            
+
             try {
                 const response = await fetch(`${API_BASE_URL}/api/v1/connectors`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     alert('✅ Custom connector created successfully!');
                     closeCustomConnectorModal();
@@ -963,4 +973,5 @@
         }
     </script>
 </body>
+
 </html>

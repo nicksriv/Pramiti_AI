@@ -59,3 +59,16 @@ htmlcov/
 # Temporary files
 *.tmp
 *.bak
+teams_credentials.txt
+drive_credentials.txt
+drive_credentials.json
+.oauth_tokens/
+.vps_config
+
+# Environment variables
+.env
+.env.local
+.vps_config
+
+# OAuth tokens
+.oauth_tokens/
