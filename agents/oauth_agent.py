@@ -178,25 +178,33 @@ class OAuthAssistantAgent(BaseAgent):
         """Ask user for their email address"""
         provider = "Microsoft 365" if auth_type == "microsoft" else "Google Workspace"
         
+        # For now, use a generic placeholder that will be caught by API
+        # This allows direct OAuth flow without email
+        placeholder_email = "user@placeholder.com"
+        
         return f"""
 🔐 **{provider} Authentication**
 
-To get started, I need your email address.
+Great! I'll redirect you to {provider} to sign in.
 
-Please provide your work email address (e.g., yourname@company.com) and I'll generate a secure login link for you.
+🔗 **Click here to authenticate:** [Login with {provider}](#auth-{auth_type}-{placeholder_email})
 
-**Example:**
-```
-My email is john.doe@company.com
-```
+**What happens next:**
+1. You'll be redirected to {provider} login page
+2. Log in with your work account credentials
+3. Accept the requested permissions
+4. You'll be redirected back to the application
+5. Done! You can now use all features
 
-Once you log in, you'll be able to:
-{"📧 Send and read Outlook emails" if auth_type == "microsoft" else "📧 Send and read Gmail"}
-{"📁 Access your OneDrive files" if auth_type == "microsoft" else "📁 Access your Google Drive"}
-{"📅 Manage your Outlook calendar" if auth_type == "microsoft" else "📅 Manage your Google Calendar"}
-{"👥 Create Teams meetings" if auth_type == "microsoft" else ""}
+**Permissions requested:**
+{"• Read and send emails (Outlook)" if auth_type == "microsoft" else "• Read and send emails (Gmail)"}
+{"• Access files (OneDrive)" if auth_type == "microsoft" else "• Access files (Google Drive)"}
+{"• Manage calendar events" if auth_type == "microsoft" else "• Manage calendar events (Google Calendar)"}
+{"• Create meetings (Teams)" if auth_type == "microsoft" else ""}
 
-Your credentials are secure and stored separately for each user.
+🔒 **Security:** Your tokens are encrypted and stored separately. We never see your password.
+
+_This is a one-time setup. Your authentication will be remembered for future sessions._
         """.strip()
     
     def _start_auth_flow(self, user_email: str, auth_type: str) -> Message:

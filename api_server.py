@@ -1082,12 +1082,25 @@ async def user_chatbot(chat_message: ChatMessage):
         
         # Check if we need to generate actual OAuth URL
         if "#auth-" in response_text:
-            # Extract user email and auth type from placeholder
+            # Extract auth type from placeholder
             import re
             placeholder_match = re.search(r'#auth-(microsoft|google)-([^\s\)]+)', response_text)
             if placeholder_match:
                 auth_type = placeholder_match.group(1)
-                user_email = placeholder_match.group(2)
+                placeholder_email = placeholder_match.group(2)
+                
+                # Use actual user_id as email if placeholder is used
+                # or extract real email from message
+                user_email = chat_message.user_id
+                
+                # Try to extract real email from message if provided
+                email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+                email_matches = re.findall(email_pattern, chat_message.message)
+                if email_matches:
+                    user_email = email_matches[0]
+                elif placeholder_email != "user@placeholder.com":
+                    # Use the email from placeholder if it's not the default
+                    user_email = placeholder_email
                 
                 # Map auth type to connector type
                 connector_type_map = {
@@ -1105,16 +1118,73 @@ async def user_chatbot(chat_message: ChatMessage):
                 # Add credentials based on connector type
                 import os
                 if auth_type == "microsoft":
+                    client_id = os.getenv("MICROSOFT_CLIENT_ID")
+                    client_secret = os.getenv("MICROSOFT_CLIENT_SECRET")
+                    tenant_id = os.getenv("MICROSOFT_TENANT_ID", "common")
+                    
+                    if not client_id or not client_secret:
+                        response_text = f"""
+❌ **Microsoft OAuth Not Configured**
+
+To enable Microsoft 365 authentication, you need to set up OAuth credentials in your `.env` file:
+
+```
+MICROSOFT_CLIENT_ID=your_client_id_here
+MICROSOFT_CLIENT_SECRET=your_client_secret_here
+MICROSOFT_TENANT_ID=common
+```
+
+**How to get these credentials:**
+1. Go to Azure Portal (https://portal.azure.com)
+2. Navigate to "Azure Active Directory" → "App registrations"
+3. Create a new app registration or use existing one
+4. Copy the "Application (client) ID" → This is your CLIENT_ID
+5. Go to "Certificates & secrets" → Create new client secret → Copy the value
+6. Set the redirect URI to: `http://localhost:8084/api/v1/oauth/callback/microsoft`
+
+**Need help?** Check out `CREDENTIALS_SETUP.md` for detailed instructions.
+
+_For now, I've shown you what the authentication flow would look like, but you'll need to configure the credentials to actually connect._
+                        """.strip()
+                        return {
+                            "response": response_text,
+                            "agent": "OAuth Assistant",
+                            "routed_to": "OAuth Assistant",
+                            "routing_reason": "OAuth credentials not configured"
+                        }
+                    
                     oauth_payload.update({
-                        "client_id": os.getenv("MICROSOFT_CLIENT_ID", ""),
-                        "client_secret": os.getenv("MICROSOFT_CLIENT_SECRET", ""),
-                        "tenant_id": os.getenv("MICROSOFT_TENANT_ID", "common")
+                        "client_id": client_id,
+                        "client_secret": client_secret,
+                        "tenant_id": tenant_id
                     })
                 elif auth_type == "google":
-                    # TODO: Add Google credentials when ready
+                    client_id = os.getenv("GOOGLE_CLIENT_ID")
+                    client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+                    
+                    if not client_id or not client_secret:
+                        response_text = """
+❌ **Google OAuth Not Configured**
+
+Google Workspace authentication is not yet configured. Please set up OAuth credentials in your `.env` file:
+
+```
+GOOGLE_CLIENT_ID=your_client_id_here
+GOOGLE_CLIENT_SECRET=your_client_secret_here
+```
+
+**Need help?** Check out `CREDENTIALS_SETUP.md` for detailed instructions.
+                        """.strip()
+                        return {
+                            "response": response_text,
+                            "agent": "OAuth Assistant",
+                            "routed_to": "OAuth Assistant",
+                            "routing_reason": "OAuth credentials not configured"
+                        }
+                    
                     oauth_payload.update({
-                        "client_id": os.getenv("GOOGLE_CLIENT_ID", ""),
-                        "client_secret": os.getenv("GOOGLE_CLIENT_SECRET", "")
+                        "client_id": client_id,
+                        "client_secret": client_secret
                     })
                 
                 try:
@@ -1131,11 +1201,18 @@ async def user_chatbot(chat_message: ChatMessage):
                             auth_data = oauth_response.json()
                             auth_url = auth_data["authorization_url"]
                             
-                            # Update response with actual URL
-                            response_text = response_text.replace(
-                                placeholder_match.group(0),
-                                auth_url
+                            # Update response with actual URL - make it clickable
+                            auth_link_html = f'<a href="{auth_url}" target="_blank" style="color: #0066cc; text-decoration: underline; font-weight: bold;">Click Here to Login</a>'
+                            
+                            # Replace the placeholder markdown link with actual URL
+                            response_text = re.sub(
+                                r'\[Login with [^\]]+\]\(#auth-[^\)]+\)',
+                                auth_link_html,
+                                response_text
                             )
+                            
+                            # Also add the raw URL for easy access
+                            response_text += f"\n\n**Direct Link:** {auth_url}"
                         else:
                             response_text = f"❌ Failed to generate authorization URL: {oauth_response.text}"
                             
