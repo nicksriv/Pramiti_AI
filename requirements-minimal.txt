@@ -2,13 +2,16 @@
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 pydantic==2.5.0
+openai>=1.0.0
 
 # Database Support
 sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
 
 # HTTP and API
 httpx==0.25.2
 requests==2.31.0
+aiohttp
 
 # Data Processing
 python-dateutil==2.8.2
