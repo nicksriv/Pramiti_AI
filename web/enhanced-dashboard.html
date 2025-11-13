@@ -3899,12 +3899,14 @@
 
     <!-- Scripts -->
     <script>
-        // Configuration - Automatically detect API URL based on current location
-        const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:${window.location.port || '8084'}`;
+        // Configuration - Use window.location.origin for reliable API URL detection
+        // This works whether accessing via localhost, IP, or domain name
+        const API_BASE_URL = window.location.origin;
         
         // Debug: Log API URL
         console.log('🔧 API Base URL:', API_BASE_URL);
         console.log('🔧 Location details:', {
+            origin: window.location.origin,
             protocol: window.location.protocol,
             hostname: window.location.hostname,
             port: window.location.port,
