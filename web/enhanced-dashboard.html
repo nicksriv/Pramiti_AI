@@ -4586,19 +4586,17 @@
                 chatMessages.scrollTop = chatMessages.scrollHeight;
 
                 try {
-                    // Send message to agent via API
+                    // Send message to agent via API (use /user-chat for OAuth support)
                     const saveToBlockchain = document.getElementById('save-to-blockchain')?.checked || false;
 
-                    const response = await fetch(`${API_BASE_URL}/chat`, {
+                    const response = await fetch(`${API_BASE_URL}/user-chat`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            agent_id: agentId,
                             message: message,
-                            user_id: 'dashboard-user',
-                            session_id: `session-${Date.now()}`
+                            user_id: 'dashboard-user'
                         })
                     });
 
@@ -4626,7 +4624,7 @@
                         </div>
                         <div class="message-content">
                             <div class="message-header">
-                                <span class="message-sender">${data.agent_name || agentName}</span>
+                                <span class="message-sender">${data.agent || data.agent_name || 'Pramiti Assistant'}</span>
                                 <span class="message-time">${new Date(data.timestamp || new Date()).toLocaleTimeString()}</span>
                             </div>
                             <div class="message-text">${formatAgentResponse(data.response || 'No response')}</div>
@@ -4686,7 +4684,32 @@
         function formatAgentResponse(text) {
             if (!text) return 'No response';
 
-            // Escape HTML first for safety
+            // Check if response contains OAuth HTML links (for authentication flows)
+            const hasOAuthLink = text.includes('<a href="https://login.microsoftonline.com') ||
+                text.includes('<a href="https://accounts.google.com');
+
+            console.log('🔍 formatAgentResponse called');
+            console.log('📝 Input text:', text.substring(0, 200));
+            console.log('🔗 Has OAuth link:', hasOAuthLink);
+
+            // If it has OAuth links, preserve the HTML but sanitize other content
+            if (hasOAuthLink) {
+                // Simple sanitization: allow <a> tags with href and specific other safe tags
+                let formatted = text;
+
+                // Convert markdown-style formatting to HTML
+                // Bold text: **text** or __text__
+                formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                formatted = formatted.replace(/__(.+?)__/g, '<strong>$1</strong>');
+
+                // Newlines to breaks
+                formatted = formatted.replace(/\n/g, '<br>');
+
+                console.log('✅ Returning OAuth-preserved HTML (first 200 chars):', formatted.substring(0, 200));
+                return formatted;
+            }
+
+            // Original behavior for regular responses - escape HTML first for safety
             let formatted = escapeHtml(text);
 
             // Convert markdown-style formatting to HTML

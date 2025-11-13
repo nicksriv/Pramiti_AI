@@ -265,6 +265,7 @@ async def serve_openai_dashboard():
     """Serve the OpenAI dashboard HTML"""
     return FileResponse("web/openai-dashboard.html")
 
+@app.get("/enhanced-dashboard")
 @app.get("/enhanced-dashboard.html")
 async def serve_enhanced_dashboard():
     """Serve the enhanced dashboard HTML with no-cache headers"""
