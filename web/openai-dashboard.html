@@ -625,8 +625,17 @@
     </div>
 
     <script>
-        // Configuration
-        const API_BASE_URL = 'http://localhost:8084';
+        // Configuration - Dynamically detect the server URL
+        const API_BASE_URL = window.location.origin;
+        
+        console.log('🔧 OpenAI Dashboard - API Base URL:', API_BASE_URL);
+        console.log('🔧 Location details:', {
+            origin: window.location.origin,
+            protocol: window.location.protocol,
+            hostname: window.location.hostname,
+            port: window.location.port,
+            href: window.location.href
+        });
         
         // Global state
         let currentAgent = null;
