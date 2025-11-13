@@ -263,8 +263,19 @@ async def serve_openai_dashboard():
 
 @app.get("/enhanced-dashboard.html")
 async def serve_enhanced_dashboard():
-    """Serve the enhanced dashboard HTML"""
-    return FileResponse("web/enhanced-dashboard.html")
+    """Serve the enhanced dashboard HTML with no-cache headers"""
+    from fastapi.responses import Response
+    with open("web/enhanced-dashboard.html", "r") as f:
+        content = f.read()
+    return Response(
+        content=content,
+        media_type="text/html",
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
+        }
+    )
 
 @app.get("/index.html")
 async def serve_index():
