@@ -1320,6 +1320,117 @@ async def search_archives(query: str):
     results.sort(key=lambda x: x['relevance_score'], reverse=True)
     return results[:10]  # Return top 10 results
 
+# ============================================================================
+# Multi-Tenancy / Organizations Endpoints
+# ============================================================================
+
+# In-memory organizations database (replace with real DB in production)
+organizations_db = []
+
+@app.get("/api/v1/organizations")
+async def get_organizations():
+    """Get all organizations"""
+    return organizations_db
+
+@app.post("/api/v1/organizations")
+async def create_organization(data: dict):
+    """Create a new organization"""
+    org_id = f"ORG-{len(organizations_db) + 1:03d}"
+    organization = {
+        "id": org_id,
+        "name": data.get("name", ""),
+        "domain": data.get("domain", ""),
+        "plan": data.get("plan", "free"),
+        "status": "active",
+        "created_at": datetime.now().isoformat(),
+        "agent_limit": data.get("agent_limit", 5),
+        "agents_count": 0,
+        "messages_count": 0
+    }
+    organizations_db.append(organization)
+    logger.info(f"Organization created: {org_id}")
+    return organization
+
+@app.get("/api/v1/organizations/{org_id}")
+async def get_organization(org_id: str):
+    """Get organization details"""
+    org = next((o for o in organizations_db if o["id"] == org_id), None)
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+    return org
+
+@app.get("/api/v1/organizations/{org_id}/usage")
+async def get_organization_usage(org_id: str):
+    """Get organization usage statistics"""
+    org = next((o for o in organizations_db if o["id"] == org_id), None)
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+    
+    return {
+        "organization_id": org_id,
+        "agents_count": org.get("agents_count", 0),
+        "agent_limit": org.get("agent_limit", 5),
+        "messages_count": org.get("messages_count", 0),
+        "storage_used": 0,
+        "api_calls": 0
+    }
+
+@app.put("/api/v1/organizations/{org_id}")
+async def update_organization(org_id: str, data: dict):
+    """Update organization details"""
+    org = next((o for o in organizations_db if o["id"] == org_id), None)
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+    
+    org.update(data)
+    logger.info(f"Organization updated: {org_id}")
+    return org
+
+@app.delete("/api/v1/organizations/{org_id}")
+async def delete_organization(org_id: str):
+    """Delete an organization"""
+    global organizations_db
+    organizations_db = [o for o in organizations_db if o["id"] != org_id]
+    logger.info(f"Organization deleted: {org_id}")
+    return {"message": "Organization deleted successfully"}
+
+# ============================================================================
+# Intelligent Routing / Global Stats Endpoints
+# ============================================================================
+
+@app.get("/api/v1/routing/global-stats")
+async def get_global_routing_stats():
+    """Get global routing statistics"""
+    return {
+        "total_requests": 0,
+        "successful_routes": 0,
+        "failed_routes": 0,
+        "average_response_time": 0,
+        "active_agents": len([a for a in agents if a.get("enabled", True)]),
+        "total_agents": len(agents),
+        "load_distribution": {},
+        "peak_hours": [],
+        "agent_performance": []
+    }
+
+@app.get("/api/v1/agents/{agent_id}/routing-stats")
+async def get_agent_routing_stats(agent_id: str):
+    """Get routing statistics for a specific agent"""
+    agent = next((a for a in agents if a["id"] == agent_id), None)
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    
+    return {
+        "agent_id": agent_id,
+        "total_requests": 0,
+        "successful_requests": 0,
+        "failed_requests": 0,
+        "average_response_time": 0,
+        "current_load": 0,
+        "capacity": 100,
+        "utilization": 0
+    }
+
 if __name__ == "__main__":
     import uvicorn
     
