@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Flow Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0052a3;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 3px solid #0066cc;
+            white-space: pre-wrap;
+        }
+        .raw-response {
+            margin-top: 10px;
+            padding: 10px;
+            background: #333;
+            color: #0f0;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>OAuth Flow Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: API Response (Raw JSON)</h2>
+        <button onclick="testAPI()">Send "connect my outlook" to API</button>
+        <div id="api-raw" class="raw-response"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Formatted Response (With formatAgentResponse)</h2>
+        <button onclick="testFormatted()">Test formatAgentResponse Function</button>
+        <div id="formatted-result" class="response"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Direct HTML Rendering</h2>
+        <button onclick="testDirectHTML()">Render Response HTML</button>
+        <div id="html-result" class="response"></div>
+    </div>
+
+    <script>
+        // Copy the formatAgentResponse function from the dashboard
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatAgentResponse(text) {
+            if (!text) return 'No response';
+
+            // Check if response contains OAuth HTML links (for authentication flows)
+            const hasOAuthLink = text.includes('<a href="https://login.microsoftonline.com') || 
+                                text.includes('<a href="https://accounts.google.com');
+            
+            // If it has OAuth links, preserve the HTML but sanitize other content
+            if (hasOAuthLink) {
+                // Simple sanitization: allow <a> tags with href and specific other safe tags
+                let formatted = text;
+                
+                // Convert markdown-style formatting to HTML
+                // Bold text: **text** or __text__
+                formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                formatted = formatted.replace(/__(.+?)__/g, '<strong>$1</strong>');
+
+                // Newlines to breaks
+                formatted = formatted.replace(/\n/g, '<br>');
+                
+                return formatted;
+            }
+
+            // Original behavior for regular responses - escape HTML first for safety
+            let formatted = escapeHtml(text);
+
+            // Convert markdown-style formatting to HTML
+            formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            formatted = formatted.replace(/__(.+?)__/g, '<strong>$1</strong>');
+            formatted = formatted.replace(/\*(.+?)\*/g, '<em>$1</em>');
+            formatted = formatted.replace(/_(.+?)_/g, '<em>$1</em>');
+            formatted = formatted.replace(/`(.+?)`/g, '<code>$1</code>');
+
+            const paragraphs = formatted.split('\n\n');
+            formatted = paragraphs.map(p => {
+                if (p.trim().startsWith('•') || p.trim().match(/^\d+\./)) {
+                    return `<p>${p.trim()}</p>`;
+                }
+                return `<p>${p.trim()}</p>`;
+            }).join('');
+
+            formatted = formatted.replace(/\n/g, '<br>');
+
+            return formatted;
+        }
+
+        async function testAPI() {
+            const rawDiv = document.getElementById('api-raw');
+            rawDiv.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch('http://localhost:8084/user-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: 'connect my outlook',
+                        user_id: 'test123'
+                    })
+                });
+                
+                const data = await response.json();
+                rawDiv.textContent = JSON.stringify(data, null, 2);
+                
+                // Store for other tests
+                window.testResponse = data.response;
+                
+            } catch (error) {
+                rawDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        function testFormatted() {
+            const resultDiv = document.getElementById('formatted-result');
+            
+            if (!window.testResponse) {
+                resultDiv.innerHTML = '<p style="color: red;">Please run Test 1 first!</p>';
+                return;
+            }
+            
+            const formatted = formatAgentResponse(window.testResponse);
+            resultDiv.innerHTML = formatted;
+            
+            // Also show if it detected OAuth link
+            const hasOAuth = window.testResponse.includes('<a href="https://login.microsoftonline.com');
+            console.log('Has OAuth link:', hasOAuth);
+            console.log('Original response:', window.testResponse);
+            console.log('Formatted response:', formatted);
+        }
+
+        function testDirectHTML() {
+            const resultDiv = document.getElementById('html-result');
+            
+            if (!window.testResponse) {
+                resultDiv.innerHTML = '<p style="color: red;">Please run Test 1 first!</p>';
+                return;
+            }
+            
+            // Just render it directly
+            resultDiv.innerHTML = window.testResponse;
+        }
+    </script>
+</body>
+</html>
