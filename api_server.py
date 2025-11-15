@@ -1068,7 +1068,37 @@ async def user_chatbot(chat_message: ChatMessage):
     
     message_lower = chat_message.message.lower()
     
-    # Check for OAuth/authentication intent FIRST (highest priority)
+    # Import Setup Assistant to check for active sessions
+    from agents.setup_assistant_agent import setup_assistant
+    
+    # Check if user has an active setup session FIRST (highest priority)
+    if chat_message.user_id in setup_assistant.setup_sessions:
+        response_text = setup_assistant.handle_chat_message(chat_message.message, chat_message.user_id)
+        
+        return {
+            "response": response_text,
+            "agent": "Setup Assistant",
+            "routed_to": "Setup Assistant",
+            "routing_reason": "User has active setup session"
+        }
+    
+    # Check for Setup/Configuration intent (for IT admins)
+    setup_keywords = ['setup', 'configure', 'install', 'set up', 'initialize', 
+                     'credentials', 'client id', 'client secret', 'tenant id',
+                     'oauth setup', 'config', 'integration']
+    
+    if any(word in message_lower for word in setup_keywords):
+        # Route to Setup Assistant
+        response_text = setup_assistant.handle_chat_message(chat_message.message, chat_message.user_id)
+        
+        return {
+            "response": response_text,
+            "agent": "Setup Assistant",
+            "routed_to": "Setup Assistant",
+            "routing_reason": "Message contained setup/configuration keywords"
+        }
+    
+    # Check for OAuth/authentication intent (for end users)
     oauth_keywords = ['login', 'sign in', 'signin', 'authenticate', 'connect', 'auth',
                      'microsoft', 'google', 'outlook', 'gmail', 'office 365', 'o365',
                      'onedrive', 'calendar', 'account', 'access', 'email setup',

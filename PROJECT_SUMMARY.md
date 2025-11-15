@@ -16,6 +16,8 @@ A sophisticated, enterprise-grade multi-agent AI system designed as a **standalo
 - **Blockchain Communication Logging**: Immutable audit trails for all agent interactions
 - **ITSM Domain Specialization**: Expert agents for Incident, Problem, and Change Management
 - **Real-time Communication Orchestration**: Thread-safe message queues with priority handling
+- **OAuth Setup Assistant**: Conversational agent for IT admins to configure multi-organization OAuth credentials
+- **Multi-Tenant OAuth Support**: Separate OAuth configurations per organization for SaaS deployments
 
 ### 📁 Complete Project Structure
 ```
@@ -31,7 +33,9 @@ Agentic-AI-Organization/
 │   └── communication_orchestrator.py (Message routing)
 ├── agents/
 │   ├── itsm_agents.py (ITSM specialized agents)
-│   └── management_agents.py (Manager & CEO agents)
+│   ├── management_agents.py (Manager & CEO agents)
+│   ├── oauth_agent.py (OAuth authentication for end users)
+│   └── setup_assistant_agent.py (OAuth configuration for IT admins)
 ├── api/ (Ready for API development)
 └── web/ (Ready for web interface)
 ```

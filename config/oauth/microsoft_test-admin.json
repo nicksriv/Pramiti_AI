@@ -1,0 +1,7 @@
+{
+  "provider": "microsoft",
+  "client_id": "12345678-abcd-1234-ef00-123456789abc",
+  "client_secret": "MY_SECRET_VALUE_ABC123456789",
+  "tenant_id": "87654321-dcba-4321-ba00-cba987654321",
+  "redirect_uri": "http://localhost:8084/api/v1/oauth/callback/microsoft"
+}
