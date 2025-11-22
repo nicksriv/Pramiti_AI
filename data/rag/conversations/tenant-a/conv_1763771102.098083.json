@@ -1,0 +1,22 @@
+{
+  "conversation_id": "conv_1763771102.098083",
+  "org_id": "tenant-a",
+  "created_at": "2025-11-22T05:55:08.070919",
+  "messages": [
+    {
+      "doc_id": "3ab0cba70251dea2",
+      "timestamp": "2025-11-22T05:55:08.070931",
+      "user_message": "hi setup microsoft",
+      "ai_response": "Hello! I'd be happy to help you set up Microsoft services for your enterprise. Since Microsoft offers a wide range of services, could you please specify which Microsoft service or product you are looking to set up? For example, are you interested in configuring Microsoft 365 (formerly Office 365), setting up Azure services, integrating Microsoft Teams, or something else? Additionally, it would be helpful to know your current IT environment and what you aim to achieve with this setup. This information will allow me to provide you with the most relevant guidance.",
+      "rating": null,
+      "feedback": null,
+      "metadata": {
+        "context_used": false,
+        "context_length": 0,
+        "model": "gpt-4-turbo-preview",
+        "tokens_used": 166
+      }
+    }
+  ],
+  "updated_at": "2025-11-22T05:55:08.070937"
+}

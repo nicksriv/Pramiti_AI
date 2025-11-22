@@ -1,0 +1,22 @@
+{
+  "conversation_id": "conv_1763771566.535854",
+  "org_id": "tenant-a",
+  "created_at": "2025-11-22T06:02:55.339138",
+  "messages": [
+    {
+      "doc_id": "a825f9a2d02e8b7f",
+      "timestamp": "2025-11-22T06:02:55.339152",
+      "user_message": "hi setup microsoft",
+      "ai_response": "Hello! I'd be happy to help you set up Microsoft services for your organization. To provide you with the most accurate guidance, could you please clarify which Microsoft services or products you're aiming to set up? Microsoft offers a wide range of services, including but not limited to:\n\n1. **Microsoft 365** (previously Office 365) - A suite of office productivity tools that include applications like Word, Excel, PowerPoint, and Outlook, along with services like OneDrive and Teams.\n2. **Microsoft Teams** - A collaboration and communication platform that integrates with Microsoft 365 and other Microsoft services.\n3. **Azure** - Microsoft's cloud computing service for building, testing, deploying, and managing applications and services through Microsoft-managed data centers.\n4. **Windows** - Setting up Windows operating systems on corporate devices.\n5. **Active Directory** (AD) & **Azure Active Directory** (AAD) - For identity and access management.\n6. **SharePoint** - A web-based collaboration, document management and storage system, integrated with Microsoft 365.\n7. **OneDrive for Business** - Cloud storage service for businesses, part of Microsoft 365.\n8. **Exchange Online** - A hosted messaging application that provides organizations with access to the full-featured version of Exchange Server.\n\nPlease specify which service(s) you're interested in, or if you have other Microsoft-related needs. This will allow me to give you detailed instructions or guidance on how to proceed with the setup.",
+      "rating": null,
+      "feedback": null,
+      "metadata": {
+        "context_used": false,
+        "context_length": 0,
+        "model": "gpt-4-turbo-preview",
+        "tokens_used": 360
+      }
+    }
+  ],
+  "updated_at": "2025-11-22T06:02:55.339159"
+}

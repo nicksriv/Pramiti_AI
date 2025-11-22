@@ -7,7 +7,7 @@ import re
 import os
 import json
 from typing import Dict, Any, Optional
-from core.base_agent import BaseAgent, Message, MessageType
+from core.base_agent import BaseAgent, Message, MessageType, AgentRole
 
 
 class SetupAssistantAgent(BaseAgent):
@@ -20,7 +20,7 @@ class SetupAssistantAgent(BaseAgent):
             agent_id="setup-assistant-001",
             name="Setup Assistant",
             specialization="OAuth and system configuration",
-            role="assistant"
+            role=AgentRole.SUBJECT_MATTER_EXPERT
         )
         
         # Track setup sessions per user
@@ -335,6 +335,14 @@ Or type **"help"** for more information about OAuth setup.
             return self._handle_microsoft_step(user_input, user_id, current_step, session)
         elif setup_type == 'google':
             return self._handle_google_step(user_input, user_id, current_step, session)
+        else:
+            # Fallback for unknown setup type
+            del self.setup_sessions[user_id]
+            return Message(
+                message_type=MessageType.RESPONSE,
+                content={"text": "❌ Unknown setup type. Please start again with 'setup microsoft' or 'setup google'."},
+                sender_id=self.agent_id
+            )
     
     def _handle_microsoft_step(self, user_input: str, user_id: str, 
                                current_step: str, session: Dict) -> Message:
@@ -588,7 +596,7 @@ Please provide your **Google Client Secret** again:
             return False
     
     def _update_env_file(self, provider: str, client_id: str, 
-                        client_secret: str, tenant_id: str = None):
+                        client_secret: str, tenant_id: Optional[str] = None):
         """Update .env file with OAuth credentials"""
         try:
             env_file = '.env'

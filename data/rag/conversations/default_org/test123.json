@@ -1,0 +1,21 @@
+{
+  "conversation_id": "test123",
+  "org_id": "default_org",
+  "created_at": "2025-11-22T05:31:48.778257",
+  "messages": [
+    {
+      "doc_id": "0c2d469fb30a7afd",
+      "timestamp": "2025-11-22T05:31:48.778269",
+      "user_message": "Hello, I need help",
+      "ai_response": "Hello! I'm here to help. Please provide me with details about the incident or issue you're facing, and I'll assist you in resolving it.",
+      "rating": null,
+      "feedback": null,
+      "metadata": {
+        "agent": "Incident Response Specialist",
+        "routing_reason": "Message contained keywords suggesting incident_management",
+        "specialization": "incident_management"
+      }
+    }
+  ],
+  "updated_at": "2025-11-22T05:31:48.778275"
+}

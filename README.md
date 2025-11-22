@@ -9,6 +9,8 @@ This autonomous AI organization consists of specialized agents working in a hier
 - **Hierarchical Agent Structure**: Subject Matter Experts → Senior Managers → CEO Agent
 - **Blockchain Communication Logging**: Immutable audit trails for all agent interactions
 - **ITSM Domain Specialization**: Expert agents for Incident, Problem, and Change Management
+- **Enterprise-Grade Security**: Multi-cloud secrets management, AES-256 encryption, audit logging
+- **Self-Learning RAG System**: AI that learns from user interactions and feedback
 - **White-label Ready**: Configurable for different organizations and domains
 
 ## 🏗️ Architecture
@@ -35,12 +37,14 @@ This autonomous AI organization consists of specialized agents working in a hier
 ## 🛠️ Technology Stack
 
 - **Core Framework**: Python 3.8+, FastAPI, LangChain, CrewAI
+- **AI & RAG**: OpenAI GPT-4, ChromaDB (vector database), Semantic search
+- **Security**: bcrypt, PyJWT, AES-256 encryption, Multi-cloud secrets (AWS/Vault/Azure)
 - **Blockchain**: Web3.py, Ethereum-compatible networks
-- **Database**: PostgreSQL/MongoDB hybrid, SQLAlchemy ORM
+- **Database**: PostgreSQL/MongoDB hybrid, SQLAlchemy ORM, ChromaDB
 - **API**: RESTful API with FastAPI, WebSocket support
-- **Frontend**: React.js with TypeScript
+- **Frontend**: React.js with TypeScript, HTML5 chat interfaces
 - **Message Queue**: Redis for high-performance communication
-- **Monitoring**: Prometheus metrics, structured logging
+- **Monitoring**: Prometheus metrics, structured logging, security audit trails
 
 ## 🚀 Quick Start
 
@@ -120,9 +124,9 @@ docker-compose logs -f
 
 ### Advanced Features
 
-- **🧠 Machine Learning Integration**: Continuous learning from interactions
-- **🔒 Security & Compliance**: Role-based access control and audit compliance
-- **🌐 Multi-Tenant Architecture**: Support for multiple organizations
+- **🧠 Self-Learning RAG System**: AI improves from user feedback (see [RAG Documentation](docs/RAG_SYSTEM.md))
+- **🔒 Enterprise Security**: Multi-cloud secrets, encryption, audit trails (see [Security Guide](docs/SECURITY_IMPLEMENTATION.md))
+- **🌐 Multi-Tenant Architecture**: Support for multiple organizations with data isolation
 - **📱 Mobile-Ready API**: Full mobile application support
 - **🔌 Integration Framework**: Connect with existing ITSM tools
 
@@ -208,6 +212,38 @@ curl -X POST "http://localhost:8000/api/incidents" \
 # Get organization status
 curl "http://localhost:8000/api/status"
 ```
+
+### RAG Self-Learning Chat
+
+```bash
+# Start API server
+python api_server.py
+
+# Open RAG chat interface
+# Navigate to: http://localhost:8084/static/rag-chat-interface.html
+
+# Or use API directly
+curl -X POST "http://localhost:8084/api/v1/rag/chat" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "message": "How do I configure Microsoft Teams?",
+    "conversation_id": "conv_12345"
+  }'
+
+# Submit feedback (thumbs up/down)
+curl -X POST "http://localhost:8084/api/v1/rag/feedback" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "doc_id": "abc123",
+    "rating": 1
+  }'
+
+# Get learning statistics
+curl "http://localhost:8084/api/v1/rag/stats"
+```
+
+**Learn more:** See [RAG System Documentation](docs/RAG_SYSTEM.md)
 
 ## 📊 Monitoring & Analytics
 

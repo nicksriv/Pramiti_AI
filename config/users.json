@@ -1,0 +1,30 @@
+{
+    "superadmin@platform.com": {
+        "user_id": "superadmin@platform.com",
+        "org_id": "platform",
+        "role": "super_admin",
+        "name": "Platform Super Admin",
+        "password_hash": "demo_hash"
+    },
+    "admin@default.com": {
+        "user_id": "admin@default.com",
+        "org_id": "default",
+        "role": "admin",
+        "name": "Default Tenant Admin",
+        "password_hash": "demo_hash"
+    },
+    "user@tenant-a.com": {
+        "user_id": "user@tenant-a.com",
+        "org_id": "tenant-a",
+        "role": "user",
+        "name": "Tenant A User",
+        "password_hash": "demo_hash"
+    },
+    "admin@tenant-b.com": {
+        "user_id": "admin@tenant-b.com",
+        "org_id": "tenant-b",
+        "role": "admin",
+        "name": "Tenant B Admin",
+        "password_hash": "demo_hash"
+    }
+}

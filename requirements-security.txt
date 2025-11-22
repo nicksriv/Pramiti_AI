@@ -1,0 +1,161 @@
+# Enterprise Security Requirements for Pramiti AI
+# Install with: pip install -r requirements-security.txt
+
+# ==================== CRITICAL SECURITY PACKAGES ====================
+
+# Password Hashing (REQUIRED)
+bcrypt==4.1.2  # Industry-standard password hashing
+
+# JWT with proper algorithms (REQUIRED)
+PyJWT==2.8.0  # JSON Web Tokens with RS256/HS256 support
+
+# Encryption (REQUIRED)
+cryptography==42.0.2  # AES-256, RSA, Fernet encryption
+pycryptodome==3.19.1  # Additional crypto primitives
+
+# ==================== SECRETS MANAGEMENT ====================
+
+# AWS Secrets Manager
+boto3==1.34.34  # AWS SDK for Python
+botocore==1.34.34
+
+# HashiCorp Vault
+hvac==2.1.0  # Vault client for Python
+
+# Azure Key Vault
+azure-keyvault-secrets==4.7.0
+azure-identity==1.15.0
+
+# Google Cloud Secret Manager
+google-cloud-secret-manager==2.18.2
+
+# ==================== AUTHENTICATION & AUTHORIZATION ====================
+
+# OAuth 2.0 / OIDC
+authlib==1.3.0  # OAuth 2.0 client and server
+python-jose[cryptography]==3.3.0  # JWT/JWS/JWE/JWK support
+
+# Multi-factor Authentication
+pyotp==2.9.0  # TOTP/HOTP for 2FA
+qrcode==7.4.2  # QR code generation for 2FA setup
+
+# ==================== API SECURITY ====================
+
+# Rate Limiting
+slowapi==0.1.9  # Rate limiting for FastAPI
+redis==5.0.1  # Required for distributed rate limiting
+
+# Input Validation & Sanitization
+pydantic==2.5.3  # Data validation
+bleach==6.1.0  # HTML sanitization (XSS prevention)
+python-validator==1.1.0  # Additional validation
+
+# CORS & Security Headers
+starlette==0.35.1  # Included with FastAPI, but pinned for security
+
+# ==================== DATABASE SECURITY ====================
+
+# SQL Injection Prevention (ORMs)
+sqlalchemy==2.0.25  # Always use parameterized queries
+psycopg2-binary==2.9.9  # PostgreSQL adapter
+
+# NoSQL Security
+pymongo==4.6.1  # MongoDB with authentication
+
+# ==================== NETWORK SECURITY ====================
+
+# TLS/SSL Certificate Management
+certifi==2023.11.17  # Root certificates
+pyOpenSSL==24.0.0  # OpenSSL wrapper
+
+# HTTP Security
+httpx==0.26.0  # HTTP client with proper SSL verification
+urllib3==2.1.0  # HTTP library with security features
+
+# ==================== LOGGING & MONITORING ====================
+
+# Security Audit Logging
+structlog==24.1.0  # Structured logging
+python-json-logger==2.0.7  # JSON log formatting
+
+# SIEM Integration
+splunk-sdk==1.7.4  # Splunk integration
+elasticsearch==8.12.0  # ELK Stack integration
+
+# Monitoring
+prometheus-client==0.19.0  # Metrics collection
+sentry-sdk[fastapi]==1.39.2  # Error tracking
+
+# ==================== COMPLIANCE & DATA PROTECTION ====================
+
+# GDPR/Privacy
+anonymizeip==1.0.0  # IP address anonymization
+
+# Data Encryption at Rest
+sqlcipher3==0.5.2  # Encrypted SQLite (if using)
+
+# ==================== VULNERABILITY SCANNING ====================
+
+# Security Scanning (development/CI)
+safety==3.0.1  # Check for known vulnerabilities
+bandit==1.7.6  # Python security linter
+
+# ==================== ADDITIONAL SECURITY ====================
+
+# Session Management
+itsdangerous==2.1.2  # Signed cookies/sessions
+
+# Content Security Policy
+secure==0.3.0  # Security headers middleware
+
+# API Key Management
+python-dotenv==1.0.0  # Environment variable management
+
+# Secrets Detection (prevent commits)
+detect-secrets==1.4.0  # Pre-commit hook for secrets
+
+# ==================== DEVELOPMENT SECURITY ====================
+
+# Security Testing
+pytest-security==0.0.3  # Security-focused tests
+hypothesis==6.98.3  # Property-based testing
+
+# Code Analysis
+pylint==3.0.3  # Security linting
+mypy==1.8.0  # Type checking
+
+# Pre-commit Hooks
+pre-commit==3.6.0  # Automated security checks
+
+# ==================== OPTIONAL ENHANCEMENTS ====================
+
+# Web Application Firewall (WAF)
+# Note: Consider cloud-based WAF (AWS WAF, Cloudflare, etc.)
+
+# DDoS Protection
+# Note: Use cloud provider DDoS protection
+
+# API Gateway Security
+# Note: Consider AWS API Gateway, Kong, etc.
+
+# ==================== NOTES ====================
+# 
+# CRITICAL CONFIGURATION:
+# 1. Set MASTER_ENCRYPTION_PASSWORD in production (never hardcode)
+# 2. Use AWS Secrets Manager/Vault for production secrets
+# 3. Enable HTTPS/TLS for all endpoints
+# 4. Configure CORS to allow only trusted origins
+# 5. Enable rate limiting on all public endpoints
+# 6. Set up security monitoring and alerting
+# 7. Implement regular security audits
+# 8. Keep all dependencies updated
+# 9. Use environment-specific configurations
+# 10. Never commit secrets to version control
+#
+# INSTALLATION:
+# pip install -r requirements-security.txt
+#
+# VERIFICATION:
+# safety check --full-report
+# bandit -r . -f json -o bandit-report.json
+#

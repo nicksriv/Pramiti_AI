@@ -1,0 +1,9 @@
+{
+  "provider": "slack",
+  "org_id": "default",
+  "created_at": "2025-11-21T06:53:47.835773",
+  "updated_at": "2025-11-21T06:53:47.835780",
+  "client_id": "test-slack-client-123",
+  "client_secret": "test-slack-secret-456",
+  "redirect_uri": "http://localhost:8084/api/v1/oauth/callback/slack"
+}

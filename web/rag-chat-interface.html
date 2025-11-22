@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pramiti AI - Self-Learning Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .chat-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .learning-stats {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .user-message .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .ai-message .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-header {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rag-badge {
+            background: #4caf50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .context-badge {
+            background: #2196f3;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+        }
+
+        .message-text {
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .feedback-buttons {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .feedback-btn {
+            background: none;
+            border: 2px solid #e0e0e0;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .feedback-btn:hover {
+            transform: scale(1.1);
+            border-color: #667eea;
+        }
+
+        .feedback-btn.active-positive {
+            background: #4caf50;
+            border-color: #4caf50;
+            color: white;
+        }
+
+        .feedback-btn.active-negative {
+            background: #f44336;
+            border-color: #f44336;
+            color: white;
+        }
+
+        .feedback-text {
+            font-size: 11px;
+            color: #666;
+            margin-left: 10px;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        #userMessage {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            resize: none;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        #userMessage:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        #sendBtn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        #sendBtn:hover:not(:disabled) {
+            transform: scale(1.05);
+        }
+
+        #sendBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            color: #667eea;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 5px;
+            padding: 15px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>🧠 Pramiti AI - Self-Learning Assistant</h1>
+            <p>AI that learns from your feedback and improves over time</p>
+            <div class="learning-stats" id="learningStats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalConversations">0</div>
+                    <div>Conversations</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="satisfactionRate">--%</div>
+                    <div>Satisfaction</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="feedbackCount">0</div>
+                    <div>Feedback</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message ai-message">
+                <div class="message-content">
+                    <div class="message-header">
+                        <span>Pramiti AI</span>
+                        <span class="rag-badge">RAG ENABLED</span>
+                    </div>
+                    <div class="message-text">
+                        👋 Hello! I'm Pramiti AI, your self-learning assistant. I improve my responses based on your
+                        feedback.
+
+                        I can help you with:
+                        • Setting up integrations (Microsoft, Google, Slack)
+                        • OAuth authentication guidance
+                        • IT service management
+                        • Troubleshooting issues
+
+                        💡 Please rate my responses with 👍 or 👎 to help me learn!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loadingIndicator">
+            <div class="typing-indicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <textarea id="userMessage" placeholder="Ask me anything... I'll learn from your feedback!"
+                    rows="1"></textarea>
+                <button id="sendBtn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8084';
+        const ORG_ID = 'demo_org';
+        const USER_ID = 'demo_user@demo_org';
+        let conversationId = null;
+
+        // Auto-resize textarea
+        const textarea = document.getElementById('userMessage');
+        textarea.addEventListener('input', function () {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+        });
+
+        // Send message on Enter (Shift+Enter for newline)
+        textarea.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        document.getElementById('sendBtn').addEventListener('click', sendMessage);
+
+        // Load learning stats on page load
+        loadLearningStats();
+
+        async function loadLearningStats() {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/rag/stats`, {
+                    headers: {
+                        'Authorization': `Bearer demo_token`,
+                        'X-Org-ID': ORG_ID,
+                        'X-User-ID': USER_ID
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const stats = data.stats;
+
+                    document.getElementById('totalConversations').textContent = stats.total_conversations || 0;
+                    document.getElementById('satisfactionRate').textContent =
+                        stats.satisfaction_rate ? `${stats.satisfaction_rate}%` : '--%';
+                    document.getElementById('feedbackCount').textContent = stats.total_feedback || 0;
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        async function sendMessage() {
+            const message = textarea.value.trim();
+            if (!message) return;
+
+            // Disable input
+            textarea.disabled = true;
+            document.getElementById('sendBtn').disabled = true;
+
+            // Add user message to chat
+            addMessage('user', message);
+            textarea.value = '';
+            textarea.style.height = 'auto';
+
+            // Show loading
+            document.getElementById('loadingIndicator').classList.add('active');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/rag/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer demo_token`,
+                        'X-Org-ID': ORG_ID,
+                        'X-User-ID': USER_ID
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        conversation_id: conversationId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    conversationId = data.conversation_id;
+                    addMessage('ai', data.message, data.metadata, data.conversation_id);
+
+                    // Refresh stats
+                    loadLearningStats();
+                } else {
+                    addMessage('ai', '❌ Sorry, I encountered an error. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('ai', '❌ Failed to connect to the server. Please check your connection.');
+            } finally {
+                // Hide loading and re-enable input
+                document.getElementById('loadingIndicator').classList.remove('active');
+                textarea.disabled = false;
+                document.getElementById('sendBtn').disabled = false;
+                textarea.focus();
+            }
+        }
+
+        function addMessage(sender, text, metadata = {}, docId = null) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+
+            let headerHTML = '';
+            if (sender === 'ai') {
+                headerHTML = '<div class="message-header"><span>Pramiti AI</span>';
+
+                if (metadata.learning_enabled) {
+                    headerHTML += '<span class="rag-badge">LEARNING</span>';
+                }
+
+                if (metadata.context_used) {
+                    headerHTML += `<span class="context-badge">${metadata.context_length} chars context</span>`;
+                }
+
+                headerHTML += '</div>';
+            } else {
+                headerHTML = '<div class="message-header"><span>You</span></div>';
+            }
+
+            let feedbackHTML = '';
+            if (sender === 'ai' && docId) {
+                feedbackHTML = `
+                    <div class="feedback-buttons">
+                        <button class="feedback-btn" onclick="submitFeedback('${docId}', 1, this)" title="Helpful">
+                            👍 <span style="font-size: 12px;">Helpful</span>
+                        </button>
+                        <button class="feedback-btn" onclick="submitFeedback('${docId}', -1, this)" title="Not Helpful">
+                            👎 <span style="font-size: 12px;">Not Helpful</span>
+                        </button>
+                        <span class="feedback-text" data-doc="${docId}"></span>
+                    </div>
+                `;
+            }
+
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    ${headerHTML}
+                    <div class="message-text">${escapeHtml(text)}</div>
+                    ${feedbackHTML}
+                </div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        async function submitFeedback(docId, rating, button) {
+            // Prevent double-click
+            if (button.disabled) return;
+
+            const container = button.parentElement;
+            const buttons = container.querySelectorAll('.feedback-btn');
+
+            // Disable all buttons
+            buttons.forEach(btn => btn.disabled = true);
+
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/rag/feedback`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer demo_token`,
+                        'X-Org-ID': ORG_ID,
+                        'X-User-ID': USER_ID
+                    },
+                    body: JSON.stringify({
+                        doc_id: docId,
+                        rating: rating
+                    })
+                });
+
+                if (response.ok) {
+                    // Update UI
+                    button.classList.add(rating > 0 ? 'active-positive' : 'active-negative');
+                    const feedbackText = container.querySelector('.feedback-text');
+                    feedbackText.textContent = rating > 0 ? '✓ Thanks for the feedback!' : '✓ Feedback recorded';
+                    feedbackText.style.color = rating > 0 ? '#4caf50' : '#f44336';
+
+                    // Refresh stats
+                    loadLearningStats();
+                } else {
+                    alert('Failed to submit feedback. Please try again.');
+                    buttons.forEach(btn => btn.disabled = false);
+                }
+            } catch (error) {
+                console.error('Feedback error:', error);
+                alert('Failed to submit feedback. Please try again.');
+                buttons.forEach(btn => btn.disabled = false);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+
+</html>

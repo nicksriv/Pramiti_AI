@@ -2384,6 +2384,439 @@
             border-left: 4px solid var(--error-color);
         }
 
+        /* RAG Self-Learning Chat Styles */
+        .rag-chat-section {
+            height: calc(100vh - 220px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .learning-stats-mini {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .stat-mini {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 0.75rem;
+            border: 2px solid var(--primary-color);
+        }
+
+        .stat-mini-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            line-height: 1;
+        }
+
+        .stat-mini-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .rag-chat-container {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 1.5rem;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .rag-chat-window {
+            background: var(--surface-color);
+            border-radius: 1.25rem;
+            border: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .rag-chat-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .rag-header-info h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .rag-header-info p {
+            margin: 0;
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        .rag-learning-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .rag-learning-stats .stat-item {
+            text-align: center;
+        }
+
+        .rag-learning-stats .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .rag-learning-stats .stat-label {
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+
+        .rag-chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            background: var(--background-color);
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 3rem 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .welcome-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem;
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .welcome-message h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .welcome-message p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .welcome-features {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: flex-start;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .feature-item i {
+            color: var(--success-color);
+            font-size: 1.1rem;
+        }
+
+        .rag-message {
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .rag-message-content {
+            max-width: 70%;
+            padding: 1rem 1.25rem;
+            border-radius: 1rem;
+            position: relative;
+        }
+
+        .rag-message.user .rag-message-content {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .rag-message.ai .rag-message-content {
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-bottom-left-radius: 0.25rem;
+        }
+
+        .rag-message-header {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .rag-badge {
+            background: var(--success-color);
+            color: white;
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.75rem;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .context-badge {
+            background: #2196f3;
+            color: white;
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.75rem;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        .rag-message-text {
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .rag-feedback-buttons {
+            margin-top: 0.75rem;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .rag-feedback-btn {
+            background: white;
+            border: 2px solid var(--border-color);
+            padding: 0.5rem 0.75rem;
+            border-radius: 1.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .rag-feedback-btn:hover {
+            transform: scale(1.1);
+            border-color: var(--primary-color);
+        }
+
+        .rag-feedback-btn.active-positive {
+            background: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+
+        .rag-feedback-btn.active-negative {
+            background: var(--error-color);
+            border-color: var(--error-color);
+            color: white;
+        }
+
+        .rag-feedback-text {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-left: 0.5rem;
+        }
+
+        .rag-typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.25rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            max-width: 150px;
+        }
+
+        .rag-typing-dots {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .rag-typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .rag-typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .rag-typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .rag-chat-input-area {
+            padding: 1.5rem;
+            background: var(--surface-color);
+            border-top: 2px solid var(--border-color);
+        }
+
+        .rag-input-container {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .rag-input-field {
+            flex: 1;
+            padding: 0.875rem 1.25rem;
+            border: 2px solid var(--border-color);
+            border-radius: 2rem;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .rag-input-field:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .rag-send-btn {
+            padding: 0.875rem 1.75rem;
+            border-radius: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .rag-chat-options {
+            margin-top: 0.75rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .rag-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .rag-stats-card,
+        .rag-tips-card {
+            background: var(--surface-color);
+            border-radius: 1.25rem;
+            border: 2px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .rag-stats-card h4,
+        .rag-tips-card h4 {
+            margin: 0 0 1rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .progress-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .metric {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .metric-bar {
+            height: 8px;
+            background: var(--background-color);
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .metric-fill {
+            height: 100%;
+            border-radius: 1rem;
+            transition: width 0.3s ease;
+        }
+
+        .metric-fill.positive {
+            background: linear-gradient(90deg, var(--success-color), #38a169);
+        }
+
+        .metric-fill.negative {
+            background: linear-gradient(90deg, var(--error-color), #e53e3e);
+        }
+
+        .metric-value {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .rating-stars {
+            font-size: 1.25rem;
+            color: #f59e0b;
+            letter-spacing: 0.25rem;
+        }
+
+        .tips-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .tips-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .tips-list li i {
+            color: var(--primary-color);
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
         /* Connectors Styles */
         .connectors-management {
             padding: 2rem;
@@ -2453,6 +2886,9 @@
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .connector-card::before {
@@ -2490,6 +2926,12 @@
             color: white;
         }
 
+        .connector-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
         .connector-info h3 {
             margin: 0 0 0.5rem 0;
             color: var(--text-primary);
@@ -2507,7 +2949,7 @@
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
-            margin-top: 1rem;
+            margin-top: auto;
         }
 
         .capability-badge {
@@ -2517,6 +2959,33 @@
             font-weight: 600;
             background: #e0e7ff;
             color: #4f46e5;
+        }
+
+        .btn-setup {
+            margin-top: 1rem;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-setup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-setup:active {
+            transform: translateY(0);
         }
 
         .connected-list {
@@ -2658,32 +3127,40 @@
                 </button>
             </div>
 
+            <!-- User Info Display -->
+            <div class="user-info" style="padding: 15px; border-bottom: 1px solid #e5e7eb; margin-bottom: 10px;">
+                <div style="text-align: center;">
+                    <i class="fas fa-user-circle" style="font-size: 24px; color: #666;"></i>
+                    <div style="margin-top: 8px; font-size: 12px; color: #999;">Not logged in</div>
+                </div>
+            </div>
+
             <ul class="nav-menu">
-                <li class="nav-item active">
+                <li class="nav-item active" data-role-required="admin">
                     <a href="#dashboard" class="nav-link active" data-tab="dashboard">
                         <i class="fas fa-chart-line"></i>
                         <span class="nav-link-text">Dashboard</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" data-role-required="super_admin">
                     <a href="#organizations" class="nav-link" data-tab="organizations">
                         <i class="fas fa-building"></i>
                         <span class="nav-link-text">Organizations</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" data-role-required="admin">
                     <a href="#agents" class="nav-link" data-tab="agents">
                         <i class="fas fa-users"></i>
                         <span class="nav-link-text">Agent Management</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" data-role-required="super_admin">
                     <a href="#hierarchy" class="nav-link" data-tab="hierarchy">
                         <i class="fas fa-sitemap"></i>
                         <span class="nav-link-text">Hierarchy Builder</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" data-role-required="admin">
                     <a href="#chat" class="nav-link" data-tab="chat">
                         <i class="fas fa-comments"></i>
                         <span class="nav-link-text">Agent Chat</span>
@@ -2692,46 +3169,52 @@
                 <li class="nav-item">
                     <a href="#userbot" class="nav-link" data-tab="userbot">
                         <i class="fas fa-robot"></i>
-                        <span class="nav-link-text">User Chatbot</span>
+                        <span class="nav-link-text">Chat</span>
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a href="#ragchat" class="nav-link" data-tab="ragchat">
+                        <i class="fas fa-brain"></i>
+                        <span class="nav-link-text">Self-Learning Chat</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-role-required="admin">
                     <a href="#blockchain" class="nav-link" data-tab="blockchain">
                         <i class="fas fa-link"></i>
                         <span class="nav-link-text">Blockchain Logs</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" data-role-required="admin">
                     <a href="#tickets" class="nav-link" data-tab="tickets">
                         <i class="fas fa-ticket-alt"></i>
                         <span class="nav-link-text">Tickets</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" data-role-required="admin">
                     <a href="#archives" class="nav-link" data-tab="archives">
                         <i class="fas fa-archive"></i>
                         <span class="nav-link-text">Data Archives</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" data-role-required="admin">
                     <a href="#analytics" class="nav-link" data-tab="analytics">
                         <i class="fas fa-chart-bar"></i>
                         <span class="nav-link-text">Analytics</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" data-role-required="admin">
                     <a href="#roles" class="nav-link" data-tab="roles">
                         <i class="fas fa-user-tag"></i>
                         <span class="nav-link-text">Roles</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" data-role-required="admin">
                     <a href="#connectors" class="nav-link" data-tab="connectors">
                         <i class="fas fa-plug"></i>
                         <span class="nav-link-text">Connectors</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" data-role-required="admin">
                     <a href="#settings" class="nav-link" data-tab="settings">
                         <i class="fas fa-cog"></i>
                         <span class="nav-link-text">Settings</span>
@@ -3454,6 +3937,136 @@
                     </div>
                 </div>
 
+                <!-- RAG Self-Learning Chat Content -->
+                <div id="ragchat-content" class="tab-content">
+                    <div class="rag-chat-section">
+                        <div class="section-header">
+                            <div>
+                                <h2><i class="fas fa-brain"></i> Self-Learning AI Chat</h2>
+                                <p>AI-powered chat that learns from your feedback and improves over time</p>
+                            </div>
+                            <div class="learning-stats-mini" id="learning-stats-header">
+                                <div class="stat-mini">
+                                    <span class="stat-mini-value" id="total-convos-header">0</span>
+                                    <span class="stat-mini-label">Conversations</span>
+                                </div>
+                                <div class="stat-mini">
+                                    <span class="stat-mini-value" id="satisfaction-header">0%</span>
+                                    <span class="stat-mini-label">Satisfaction</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rag-chat-container">
+                            <div class="rag-chat-window">
+                                <div class="rag-chat-header">
+                                    <div class="rag-header-info">
+                                        <h3><i class="fas fa-robot"></i> Pramiti AI Assistant</h3>
+                                        <p>Enhanced with RAG (Retrieval-Augmented Generation)</p>
+                                    </div>
+                                    <div class="rag-learning-stats">
+                                        <div class="stat-item">
+                                            <div class="stat-value" id="total-conversations">0</div>
+                                            <div class="stat-label">Total Chats</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-value" id="satisfaction-rate">0%</div>
+                                            <div class="stat-label">Satisfaction</div>
+                                        </div>
+                                        <div class="stat-item">
+                                            <div class="stat-value" id="knowledge-items">0</div>
+                                            <div class="stat-label">Knowledge Base</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="rag-chat-messages" id="rag-messages">
+                                    <div class="welcome-message">
+                                        <div class="welcome-icon">
+                                            <i class="fas fa-brain"></i>
+                                        </div>
+                                        <h3>Welcome to Self-Learning Chat!</h3>
+                                        <p>I'm Pramiti AI, and I get smarter with every conversation. Your feedback
+                                            helps me learn and improve my responses.</p>
+                                        <div class="welcome-features">
+                                            <div class="feature-item">
+                                                <i class="fas fa-check-circle"></i>
+                                                <span>Learns from your feedback</span>
+                                            </div>
+                                            <div class="feature-item">
+                                                <i class="fas fa-check-circle"></i>
+                                                <span>Retrieves relevant past conversations</span>
+                                            </div>
+                                            <div class="feature-item">
+                                                <i class="fas fa-check-circle"></i>
+                                                <span>Improves accuracy over time</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="rag-chat-input-area">
+                                    <div class="rag-input-container">
+                                        <input type="text" id="rag-user-input"
+                                            placeholder="Ask me anything... I'll learn from your feedback!"
+                                            class="rag-input-field">
+                                        <button id="rag-send-btn" class="btn btn-primary rag-send-btn">
+                                            <i class="fas fa-paper-plane"></i>
+                                            Send
+                                        </button>
+                                    </div>
+                                    <div class="rag-chat-options">
+                                        <div class="checkbox-label">
+                                            <input type="checkbox" id="context-enabled" checked>
+                                            <span><i class="fas fa-lightbulb"></i> Use Knowledge Base Context</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="rag-sidebar">
+                                <div class="rag-stats-card">
+                                    <h4><i class="fas fa-chart-line"></i> Learning Progress</h4>
+                                    <div class="progress-metrics">
+                                        <div class="metric">
+                                            <span class="metric-label">Positive Feedback</span>
+                                            <div class="metric-bar">
+                                                <div class="metric-fill positive" id="positive-feedback-bar"
+                                                    style="width: 0%"></div>
+                                            </div>
+                                            <span class="metric-value" id="positive-feedback-count">0</span>
+                                        </div>
+                                        <div class="metric">
+                                            <span class="metric-label">Negative Feedback</span>
+                                            <div class="metric-bar">
+                                                <div class="metric-fill negative" id="negative-feedback-bar"
+                                                    style="width: 0%"></div>
+                                            </div>
+                                            <span class="metric-value" id="negative-feedback-count">0</span>
+                                        </div>
+                                        <div class="metric">
+                                            <span class="metric-label">Average Rating</span>
+                                            <div class="rating-stars" id="average-rating-stars">
+                                                ★★★★☆
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="rag-tips-card">
+                                    <h4><i class="fas fa-info-circle"></i> How It Works</h4>
+                                    <ul class="tips-list">
+                                        <li><i class="fas fa-arrow-right"></i> Ask any question naturally</li>
+                                        <li><i class="fas fa-arrow-right"></i> Rate responses with 👍 or 👎</li>
+                                        <li><i class="fas fa-arrow-right"></i> AI learns from your feedback</li>
+                                        <li><i class="fas fa-arrow-right"></i> Future answers improve automatically</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Other tab contents (blockchain, analytics, settings) -->
                 <div id="blockchain-content" class="tab-content">
                     <div class="blockchain-logs">
@@ -3741,7 +4354,67 @@
                         <!-- Available Connectors Tab -->
                         <div id="available-connectors-tab" class="connector-tab-content active">
                             <div class="connectors-grid" id="available-connectors">
-                                <!-- Available connectors will be loaded here -->
+                                <!-- Microsoft 365 Connector -->
+                                <div class="connector-card">
+                                    <div class="connector-header"
+                                        style="background: linear-gradient(135deg, #0078d4, #00bcf2); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
+                                        <div style="display: flex; align-items: center; gap: 15px;">
+                                            <i class="fab fa-microsoft" style="font-size: 32px;"></i>
+                                            <div>
+                                                <h3 style="margin: 0; font-size: 20px;">Microsoft 365</h3>
+                                                <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 14px;">Outlook,
+                                                    Teams, OneDrive, Calendar</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="padding: 20px;">
+                                        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
+                                            <span
+                                                style="background: #e3f2fd; color: #1976d2; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Email</span>
+                                            <span
+                                                style="background: #e3f2fd; color: #1976d2; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Chat</span>
+                                            <span
+                                                style="background: #e3f2fd; color: #1976d2; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Files</span>
+                                            <span
+                                                style="background: #e3f2fd; color: #1976d2; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Calendar</span>
+                                        </div>
+                                        <button onclick="openConnectorSetup('microsoft')"
+                                            style="width: 100%; padding: 12px; background: linear-gradient(135deg, #0078d4, #00bcf2); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                                            <i class="fas fa-plug"></i> Setup Connector
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Google Workspace Connector -->
+                                <div class="connector-card">
+                                    <div class="connector-header"
+                                        style="background: linear-gradient(135deg, #4285f4, #34a853); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
+                                        <div style="display: flex; align-items: center; gap: 15px;">
+                                            <i class="fab fa-google" style="font-size: 32px;"></i>
+                                            <div>
+                                                <h3 style="margin: 0; font-size: 20px;">Google Workspace</h3>
+                                                <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 14px;">Gmail,
+                                                    Drive, Calendar, Meet</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="padding: 20px;">
+                                        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
+                                            <span
+                                                style="background: #e8f5e9; color: #2e7d32; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Email</span>
+                                            <span
+                                                style="background: #e8f5e9; color: #2e7d32; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Files</span>
+                                            <span
+                                                style="background: #e8f5e9; color: #2e7d32; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Calendar</span>
+                                            <span
+                                                style="background: #e8f5e9; color: #2e7d32; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">Video</span>
+                                        </div>
+                                        <button onclick="openConnectorSetup('google')"
+                                            style="width: 100%; padding: 12px; background: linear-gradient(135deg, #4285f4, #34a853); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px;">
+                                            <i class="fas fa-plug"></i> Setup Connector
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -3816,6 +4489,61 @@
     </div>
 
     <!-- Modals -->
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="login-modal" style="z-index: 10000;">
+        <div class="modal" style="max-width: 400px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <h3 class="modal-title" style="color: white;">
+                    <i class="fas fa-sign-in-alt"></i> Login to Continue
+                </h3>
+            </div>
+            <div class="modal-content">
+                <p style="margin-bottom: 20px; color: #666; text-align: center;">
+                    Sign in with your organization credentials
+                </p>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-user-id">
+                            <i class="fas fa-user"></i> User ID / Email
+                        </label>
+                        <input type="text" id="login-user-id" required placeholder="admin@default.com"
+                            style="padding: 12px; font-size: 14px;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-password">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <input type="password" id="login-password" required placeholder="Enter password"
+                            style="padding: 12px; font-size: 14px;">
+                    </div>
+
+                    <div
+                        style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; font-size: 12px;">
+                        <strong>Demo Accounts:</strong><br>
+                        • <strong>superadmin@platform.com</strong> (Platform Super Admin - Full Access)<br>
+                        • admin@default.com (Default Org - Tenant Admin)<br>
+                        • admin@tenant-b.com (Tenant B - Tenant Admin)<br>
+                        • user@tenant-a.com (Tenant A - Regular User)<br>
+                        <em style="color: #666; display: block; margin-top: 8px;">
+                            Use any password (demo mode)
+                        </em>
+                    </div>
+
+                    <div id="login-error"
+                        style="display: none; margin-top: 15px; padding: 12px; background: #fee; color: #c00; border-radius: 6px; font-size: 14px;">
+                    </div>
+
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">
+                            <i class="fas fa-sign-in-alt"></i> Sign In
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Create Organization Modal -->
     <div class="modal-overlay" id="create-organization-modal">
         <div class="modal">
@@ -4371,6 +5099,189 @@
             href: window.location.href
         });
 
+        // ==================== Authentication Utilities ====================
+        const AUTH_TOKEN_KEY = 'pramiti_auth_token';
+        const AUTH_USER_KEY = 'pramiti_auth_user';
+
+        function saveAuthToken(token, user) {
+            localStorage.setItem(AUTH_TOKEN_KEY, token);
+            localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+            console.log('✅ Auth token saved for:', user.user_id, '(Org:', user.org_id + ')');
+        }
+
+        function getAuthToken() {
+            return localStorage.getItem(AUTH_TOKEN_KEY);
+        }
+
+        function getAuthUser() {
+            const userJson = localStorage.getItem(AUTH_USER_KEY);
+            return userJson ? JSON.parse(userJson) : null;
+        }
+
+        function clearAuth() {
+            localStorage.removeItem(AUTH_TOKEN_KEY);
+            localStorage.removeItem(AUTH_USER_KEY);
+            console.log('🔒 Auth cleared');
+        }
+
+        function isAuthenticated() {
+            return !!getAuthToken();
+        }
+
+        function getAuthHeaders() {
+            const token = getAuthToken();
+            return token ? {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            } : {
+                'Content-Type': 'application/json'
+            };
+        }
+
+        // Update user info display
+        function updateUserDisplay() {
+            const user = getAuthUser();
+            const userInfoDiv = document.querySelector('.user-info');
+
+            if (user && userInfoDiv) {
+                userInfoDiv.innerHTML = `
+                    <div style="text-align: right; padding: 10px;">
+                        <div style="font-weight: 600; color: #333;">${user.name || user.user_id}</div>
+                        <div style="font-size: 12px; color: #666;">${user.org_id} • ${user.role}</div>
+                        <button onclick="logout()" style="margin-top: 8px; padding: 4px 12px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </div>
+                `;
+
+                // Apply role-based navigation filtering
+                applyRoleBasedNavigation(user.role);
+            }
+        }
+
+        function applyRoleBasedNavigation(userRole) {
+            // Get all nav items with role requirements
+            const navItems = document.querySelectorAll('.nav-item[data-role-required]');
+
+            navItems.forEach(item => {
+                const requiredRole = item.getAttribute('data-role-required');
+
+                // Role hierarchy: super_admin > admin > user
+                let hasAccess = false;
+
+                if (requiredRole === 'super_admin') {
+                    // Only super_admin can access super_admin items
+                    hasAccess = (userRole === 'super_admin');
+                } else if (requiredRole === 'admin') {
+                    // Both super_admin and admin can access admin items
+                    hasAccess = (userRole === 'super_admin' || userRole === 'admin');
+                } else {
+                    // Everyone can access items without specific requirements
+                    hasAccess = true;
+                }
+
+                item.style.display = hasAccess ? '' : 'none';
+            });
+
+            // For regular users, automatically switch to userbot chat tab
+            if (userRole === 'user') {
+                // Hide dashboard, show only chat
+                const userbotTab = document.querySelector('.nav-link[data-tab="userbot"]');
+                const userbotContent = document.getElementById('userbot-content');
+
+                if (userbotTab && userbotContent) {
+                    // Remove active from all tabs
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.classList.remove('active');
+                        link.parentElement.classList.remove('active');
+                    });
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+
+                    // Activate userbot tab
+                    userbotTab.classList.add('active');
+                    userbotTab.parentElement.classList.add('active');
+                    userbotContent.classList.add('active');
+
+                    console.log('👤 Regular user - switched to chat interface');
+                }
+            }
+
+            console.log(`🔐 Navigation filtered for role: ${userRole}`);
+        }
+
+        function logout() {
+            clearAuth();
+            location.reload();
+        }
+
+        // Login handler
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const userId = document.getElementById('login-user-id').value.trim();
+            const password = document.getElementById('login-password').value;
+            const errorDiv = document.getElementById('login-error');
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+
+            errorDiv.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, password: password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    saveAuthToken(data.token, data.user);
+
+                    // Close modal and refresh
+                    document.getElementById('login-modal').classList.remove('active');
+                    updateUserDisplay();
+
+                    // Show success message
+                    showToast(`Welcome, ${data.user.name || data.user.user_id}!`, 'success');
+
+                    // Reload connectors with auth
+                    if (typeof loadAvailableConnectors === 'function') {
+                        loadAvailableConnectors();
+                    }
+                } else {
+                    const error = await response.json();
+                    errorDiv.textContent = error.detail || 'Login failed';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorDiv.textContent = 'Network error. Please try again.';
+                errorDiv.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+            }
+        }
+
+        // Check authentication on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            if (!isAuthenticated()) {
+                document.getElementById('login-modal').classList.add('active');
+            } else {
+                document.getElementById('login-modal').classList.remove('active');
+                updateUserDisplay();
+            }
+
+            // Attach login form handler
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', handleLogin);
+            }
+        });
+
         // Sidebar Toggle Function
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
@@ -4400,6 +5311,9 @@
 
                 // Setup agent chat messaging
                 setupAgentChatMessaging();
+
+                // Setup Organization Assistant messaging
+                setupUserbotMessaging();
 
                 // Load initial data
                 loadAgents();
@@ -4671,6 +5585,172 @@
             });
 
             console.log('✓ Agent chat messaging setup complete');
+        }
+
+        // Setup Organization Assistant (User Bot) messaging
+        function setupUserbotMessaging() {
+            const sendButton = document.getElementById('send-userbot-message');
+            const chatInput = document.getElementById('userbot-input');
+            const chatMessages = document.getElementById('userbot-messages');
+
+            if (!sendButton || !chatInput || !chatMessages) {
+                console.warn('⚠ Userbot chat elements not found');
+                return;
+            }
+
+            async function sendUserbotMessage() {
+                const message = chatInput.value.trim();
+                if (!message) return;
+
+                // Display user message
+                const userMessageDiv = document.createElement('div');
+                userMessageDiv.className = 'chat-message user';
+                userMessageDiv.innerHTML = `
+                    <div class="message-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-text">${escapeHtml(message)}</div>
+                    </div>
+                `;
+                chatMessages.appendChild(userMessageDiv);
+
+                // Clear input
+                chatInput.value = '';
+
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                // Show typing indicator
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'chat-message bot';
+                typingDiv.innerHTML = `
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-text">
+                            <span class="typing-dots">
+                                <span>.</span><span>.</span><span>.</span>
+                            </span>
+                        </div>
+                    </div>
+                `;
+                chatMessages.appendChild(typingDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                try {
+                    // Send message to user-chat API
+                    // Include user role for context-aware routing (admin vs regular user)
+                    const user = getAuthUser();
+                    const requestBody = {
+                        message: message,
+                        user_id: user ? user.user_id : 'dashboard-user',
+                        agent_id: 'userbot',
+                        session_id: `userbot-${Date.now()}`
+                    };
+
+                    // Add role and org_id if user is logged in
+                    if (user) {
+                        requestBody.role = user.role;
+                        requestBody.org_id = user.org_id;
+                    }
+
+                    const response = await fetch(`${API_BASE_URL}/user-chat`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(requestBody)
+                    });
+
+                    // Remove typing indicator
+                    typingDiv.remove();
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    // Display bot response
+                    const botMessageDiv = document.createElement('div');
+                    botMessageDiv.className = 'chat-message bot';
+                    botMessageDiv.innerHTML = `
+                        <div class="message-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-text">${formatAgentResponse(data.response)}</div>
+                        </div>
+                    `;
+                    chatMessages.appendChild(botMessageDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                } catch (error) {
+                    // Remove typing indicator
+                    typingDiv.remove();
+
+                    console.error('❌ Userbot chat error:', error);
+
+                    // Display error message
+                    const errorMessageDiv = document.createElement('div');
+                    errorMessageDiv.className = 'chat-message bot error';
+                    errorMessageDiv.innerHTML = `
+                        <div class="message-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-text">
+                                ⚠️ Sorry, I'm having trouble responding right now. Please try again later.
+                            </div>
+                        </div>
+                    `;
+                    chatMessages.appendChild(errorMessageDiv);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+            }
+
+            // Send button click
+            sendButton.addEventListener('click', sendUserbotMessage);
+
+            // Enter key press
+            chatInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    sendUserbotMessage();
+                }
+            });
+
+            // Quick action buttons
+            document.querySelectorAll('.quick-action-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const action = this.getAttribute('data-action');
+                    let message = '';
+
+                    switch (action) {
+                        case 'report-incident':
+                            message = 'I need to report an incident';
+                            break;
+                        case 'service-request':
+                            message = 'I would like to submit a service request';
+                            break;
+                        case 'check-status':
+                            message = 'Can you check the status of my request?';
+                            break;
+                        case 'ask-question':
+                            message = 'I have a question';
+                            break;
+                    }
+
+                    if (message) {
+                        chatInput.value = message;
+                        chatInput.focus();
+                    }
+                });
+            });
+
+            console.log('✓ Organization Assistant messaging setup complete');
         }
 
         // HTML escape helper
@@ -6903,8 +7983,21 @@
                         .filter(([key, value]) => value === true)
                         .map(([key]) => key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()));
 
+                    // Map connector types to modal IDs (some have custom modals, others use generic)
+                    const typeMapping = {
+                        'microsoft_teams': 'microsoft',
+                        'google_drive': 'google',
+                        'slack': 'slack',
+                        'jira': 'jira',
+                        'servicenow': 'servicenow',
+                        'confluence': 'confluence',
+                        'sharepoint': 'sharepoint',
+                        'github': 'github'
+                    };
+                    const setupType = typeMapping[connector.type] || connector.type;
+
                     return `
-                        <div class="connector-card" onclick="openConnectorSetup('${connector.type}')">
+                        <div class="connector-card">
                             <div class="connector-icon">
                                 <i class="${getConnectorIcon(connector.type)}"></i>
                             </div>
@@ -6917,6 +8010,9 @@
                                     `).join('')}
                                 </div>
                             </div>
+                            <button class="btn-setup" onclick="openConnectorSetup('${setupType}')">
+                                <i class="fas fa-plug"></i> Setup Connector
+                            </button>
                         </div>
                     `;
                 }).join('');
@@ -7230,6 +8326,249 @@
         document.querySelector('.nav-link[data-tab="connectors"]').addEventListener('click', function () {
             loadAvailableConnectors();
         });
+
+        // ==================== RAG Self-Learning Chat ====================
+        let ragConversationHistory = [];
+        let currentRAGDocId = null;
+
+        // Initialize RAG chat when tab is shown
+        document.querySelector('.nav-link[data-tab="ragchat"]')?.addEventListener('click', function () {
+            loadRAGStats();
+        });
+
+        // Send RAG message
+        document.getElementById('rag-send-btn')?.addEventListener('click', sendRAGMessage);
+        document.getElementById('rag-user-input')?.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendRAGMessage();
+            }
+        });
+
+        async function sendRAGMessage() {
+            const input = document.getElementById('rag-user-input');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // Authentication required for tenant isolation
+            const user = getAuthUser();
+            if (!user) {
+                showToast('Please log in to use Self-Learning chat. This ensures your conversations are saved to your organization\'s knowledge base.', 'error');
+                return;
+            }
+
+            // Add user message to UI
+            addRAGMessage(message, 'user');
+            input.value = '';
+
+            // Show typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'rag-message ai';
+            typingDiv.id = 'rag-typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="rag-typing-indicator">
+                    <div class="rag-typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <span>AI is thinking...</span>
+                </div>
+            `;
+            document.getElementById('rag-messages').appendChild(typingDiv);
+            document.getElementById('rag-messages').scrollTop = document.getElementById('rag-messages').scrollHeight;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/rag/chat`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({
+                        message: message  // Fixed: Use 'message' not 'user_message'
+                    })
+                });
+
+                // Remove typing indicator
+                document.getElementById('rag-typing-indicator')?.remove();
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Backend returns: { success, conversation_id, message, metadata }
+                    const contextUsed = data.metadata?.context_used || false;
+                    addRAGMessage(data.message, 'ai', contextUsed, data.conversation_id);
+                    loadRAGStats(); // Update stats after each message
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            } catch (error) {
+                console.error('RAG chat error:', error);
+                document.getElementById('rag-typing-indicator')?.remove();
+                addRAGMessage('Sorry, I encountered an error. Please try again.', 'ai');
+                showToast('Failed to send message', 'error');
+            }
+        }
+
+        function addRAGMessage(text, sender, contextUsed = false, docId = null) {
+            const messagesDiv = document.getElementById('rag-messages');
+            const welcomeMsg = messagesDiv.querySelector('.welcome-message');
+            if (welcomeMsg) {
+                welcomeMsg.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `rag-message ${sender}`;
+
+            let content = '';
+
+            if (sender === 'user') {
+                content = `
+                    <div class="rag-message-content">
+                        <div class="rag-message-text">${escapeHtml(text)}</div>
+                        <div class="rag-message-header">
+                            <span>${new Date().toLocaleTimeString()}</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                content = `
+                    <div class="rag-message-content">
+                        <div class="rag-message-header">
+                            <span>Pramiti AI</span>
+                            ${contextUsed ? '<span class="context-badge">Context Used</span>' : ''}
+                            <span class="rag-badge">RAG</span>
+                        </div>
+                        <div class="rag-message-text">${escapeHtml(text)}</div>
+                        ${docId ? `
+                            <div class="rag-feedback-buttons">
+                                <button class="rag-feedback-btn" onclick="submitRAGFeedback('${docId}', 1, this)">
+                                    👍
+                                </button>
+                                <button class="rag-feedback-btn" onclick="submitRAGFeedback('${docId}', -1, this)">
+                                    👎
+                                </button>
+                                <span class="rag-feedback-text">Was this helpful?</span>
+                            </div>
+                        ` : ''}
+                        <div class="rag-message-header">
+                            <span>${new Date().toLocaleTimeString()}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            messageDiv.innerHTML = content;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        async function submitRAGFeedback(docId, rating, buttonElement) {
+            const user = getAuthUser();
+            if (!user) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/rag/feedback`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({
+                        doc_id: docId,
+                        rating: rating,
+                        org_id: user.org_id
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update button states
+                    const feedbackBtns = buttonElement.parentElement.querySelectorAll('.rag-feedback-btn');
+                    feedbackBtns.forEach(btn => {
+                        btn.classList.remove('active-positive', 'active-negative');
+                    });
+
+                    if (rating === 1) {
+                        buttonElement.classList.add('active-positive');
+                        showToast('Thank you for your positive feedback!', 'success');
+                    } else {
+                        buttonElement.classList.add('active-negative');
+                        showToast('Thank you for your feedback. I\'ll learn from this.', 'success');
+                    }
+
+                    // Update stats
+                    loadRAGStats();
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            } catch (error) {
+                console.error('Feedback error:', error);
+                showToast('Failed to submit feedback', 'error');
+            }
+        }
+
+        async function loadRAGStats() {
+            const user = getAuthUser();
+            if (!user) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/rag/stats?org_id=${user.org_id}`, {
+                    headers: getAuthHeaders()
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const stats = data.data;
+
+                    // Update header stats
+                    document.getElementById('total-conversations').textContent = stats.total_conversations;
+                    document.getElementById('satisfaction-rate').textContent = stats.satisfaction_rate;
+                    document.getElementById('knowledge-items').textContent = stats.total_conversations;
+
+                    document.getElementById('total-convos-header').textContent = stats.total_conversations;
+                    document.getElementById('satisfaction-header').textContent = stats.satisfaction_rate;
+
+                    // Update sidebar stats
+                    document.getElementById('positive-feedback-count').textContent = stats.positive_feedback;
+                    document.getElementById('negative-feedback-count').textContent = stats.negative_feedback;
+
+                    const total = stats.positive_feedback + stats.negative_feedback;
+                    if (total > 0) {
+                        const positivePercent = (stats.positive_feedback / total) * 100;
+                        const negativePercent = (stats.negative_feedback / total) * 100;
+                        document.getElementById('positive-feedback-bar').style.width = positivePercent + '%';
+                        document.getElementById('negative-feedback-bar').style.width = negativePercent + '%';
+                    }
+
+                    // Update rating stars
+                    const avgRating = stats.average_rating;
+                    let starsHtml = '';
+                    for (let i = 1; i <= 5; i++) {
+                        starsHtml += i <= avgRating ? '★' : '☆';
+                    }
+                    document.getElementById('average-rating-stars').textContent = starsHtml;
+                }
+            } catch (error) {
+                console.error('Failed to load RAG stats:', error);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
     </script>
     <style>
         /* Organization Management Styles */
@@ -8360,6 +9699,10 @@
             animation: fadeIn 0.2s ease;
         }
 
+        .modal-overlay.active {
+            display: flex;
+        }
+
         .modal {
             background: white;
             border-radius: 1.5rem;
@@ -8527,7 +9870,940 @@
             padding: 0.5rem 1rem;
             font-size: 0.875rem;
         }
+
+        /* Connector Setup Modal Styles */
+        .connector-setup-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .connector-setup-modal.active {
+            display: flex !important;
+        }
+
+        .connector-setup-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .connector-setup-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .connector-setup-header h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .connector-icon-large {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .connector-icon-large.microsoft {
+            background: linear-gradient(135deg, #0078d4, #00bcf2);
+            color: white;
+        }
+
+        .connector-icon-large.google {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            color: white;
+        }
+
+        .connector-close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .connector-close-btn:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .setup-form-group {
+            margin-bottom: 20px;
+        }
+
+        .setup-form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .setup-form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .setup-form-group input:focus {
+            outline: none;
+            border-color: #0078d4;
+            box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1);
+        }
+
+        .setup-form-group .help-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 6px;
+            display: block;
+        }
+
+        .setup-instructions {
+            background: #f8f9fa;
+            border-left: 4px solid #0078d4;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+
+        .setup-instructions h4 {
+            margin: 0 0 10px 0;
+            color: #0078d4;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .setup-instructions ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .setup-instructions li {
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .redirect-uri-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .redirect-uri-box strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #856404;
+        }
+
+        .redirect-uri-box code {
+            display: block;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #333;
+            word-break: break-all;
+            border: 1px solid #ffc107;
+        }
+
+        .setup-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .setup-btn-primary {
+            background: linear-gradient(135deg, #0078d4, #00bcf2);
+            color: white;
+        }
+
+        .setup-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 120, 212, 0.3);
+        }
+
+        .setup-btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            margin-right: 10px;
+        }
+
+        .setup-status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .setup-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .setup-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
     </style>
+
+    <!-- Microsoft 365 Setup Modal -->
+    <div id="microsoft-setup-modal" class="connector-setup-modal">
+        <div class="connector-setup-content">
+            <div class="connector-setup-header">
+                <h2>
+                    <div class="connector-icon-large microsoft">
+                        <i class="fab fa-microsoft"></i>
+                    </div>
+                    Microsoft 365 Setup
+                </h2>
+                <button class="connector-close-btn" onclick="closeConnectorSetup('microsoft')">&times;</button>
+            </div>
+
+            <div class="setup-instructions">
+                <h4>📋 How to get your credentials:</h4>
+                <ol>
+                    <li>Go to <a href="https://portal.azure.com" target="_blank">Azure Portal</a></li>
+                    <li>Navigate to <strong>App registrations</strong></li>
+                    <li>Click <strong>+ New registration</strong></li>
+                    <li>Copy the <strong>Application (client) ID</strong></li>
+                    <li>Copy the <strong>Directory (tenant) ID</strong></li>
+                    <li>Go to <strong>Certificates & secrets</strong> → <strong>+ New client secret</strong></li>
+                    <li>Copy the secret <strong>Value</strong> immediately</li>
+                </ol>
+            </div>
+
+            <div class="redirect-uri-box">
+                <strong>⚠️ Add this Redirect URI in Azure:</strong>
+                <code>http://localhost:8084/api/v1/oauth/callback/microsoft</code>
+            </div>
+
+            <form id="microsoft-setup-form">
+                <div class="setup-form-group">
+                    <label for="microsoft-client-id">Client ID (Application ID) *</label>
+                    <input type="text" id="microsoft-client-id" required
+                        placeholder="12345678-abcd-1234-5678-123456789abc">
+                    <span class="help-text">Format: GUID</span>
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="microsoft-client-secret">Client Secret *</label>
+                    <input type="password" id="microsoft-client-secret" required placeholder="Your Azure client secret">
+                    <span class="help-text">The secret value from Azure</span>
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="microsoft-tenant-id">Tenant ID (Directory ID) *</label>
+                    <input type="text" id="microsoft-tenant-id" required
+                        placeholder="87654321-dcba-4321-4321-cba987654321">
+                    <span class="help-text">Format: GUID or "common"</span>
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="microsoft-org-id">Organization ID *</label>
+                    <input type="text" id="microsoft-org-id" required value="default">
+                    <span class="help-text">Use "default" for main organization</span>
+                </div>
+
+                <div class="setup-status" id="microsoft-setup-status"></div>
+
+                <div style="margin-top: 25px;">
+                    <button type="button" class="setup-btn setup-btn-secondary"
+                        onclick="closeConnectorSetup('microsoft')">Cancel</button>
+                    <button type="submit" class="setup-btn setup-btn-primary">Save Configuration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Google Workspace Setup Modal -->
+    <div id="google-setup-modal" class="connector-setup-modal">
+        <div class="connector-setup-content">
+            <div class="connector-setup-header">
+                <h2>
+                    <div class="connector-icon-large google">
+                        <i class="fab fa-google"></i>
+                    </div>
+                    Google Workspace Setup
+                </h2>
+                <button class="connector-close-btn" onclick="closeConnectorSetup('google')">&times;</button>
+            </div>
+
+            <div class="setup-instructions">
+                <h4>📋 How to get your credentials:</h4>
+                <ol>
+                    <li>Go to <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a></li>
+                    <li>Create a new project or select existing</li>
+                    <li>Enable <strong>Gmail API</strong>, <strong>Drive API</strong>, <strong>Calendar API</strong>
+                    </li>
+                    <li>Go to <strong>APIs & Services</strong> → <strong>Credentials</strong></li>
+                    <li>Click <strong>+ CREATE CREDENTIALS</strong> → <strong>OAuth client ID</strong></li>
+                    <li>Copy the <strong>Client ID</strong> and <strong>Client secret</strong></li>
+                </ol>
+            </div>
+
+            <div class="redirect-uri-box">
+                <strong>⚠️ Add this Authorized redirect URI in Google Cloud Console:</strong>
+                <code>http://localhost:8084/api/v1/oauth/callback/google</code>
+            </div>
+
+            <form id="google-setup-form">
+                <div class="setup-form-group">
+                    <label for="google-client-id">Client ID *</label>
+                    <input type="text" id="google-client-id" required
+                        placeholder="123456789-abc.apps.googleusercontent.com">
+                    <span class="help-text">Format: xxx.apps.googleusercontent.com</span>
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="google-client-secret">Client Secret *</label>
+                    <input type="password" id="google-client-secret" required placeholder="GOCSPX-xxxxxxxxxxxxxxxxxxxx">
+                    <span class="help-text">Usually starts with GOCSPX-</span>
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="google-org-id">Organization ID *</label>
+                    <input type="text" id="google-org-id" required value="default">
+                    <span class="help-text">Use "default" for main organization</span>
+                </div>
+
+                <div class="setup-status" id="google-setup-status"></div>
+
+                <div style="margin-top: 25px;">
+                    <button type="button" class="setup-btn setup-btn-secondary"
+                        onclick="closeConnectorSetup('google')">Cancel</button>
+                    <button type="submit" class="setup-btn setup-btn-primary">Save Configuration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Slack Setup Modal -->
+    <div id="slack-setup-modal" class="connector-setup-modal">
+        <div class="connector-setup-content">
+            <div class="connector-setup-header">
+                <h2>
+                    <div class="connector-icon-large slack">
+                        <i class="fab fa-slack"></i>
+                    </div>
+                    Slack Setup
+                </h2>
+                <button class="connector-close-btn" onclick="closeConnectorSetup('slack')">&times;</button>
+            </div>
+
+            <div class="setup-instructions">
+                <h4>📋 How to get your credentials:</h4>
+                <ol>
+                    <li>Go to <a href="https://api.slack.com/apps" target="_blank">Slack API Apps</a></li>
+                    <li>Click <strong>Create New App</strong> → <strong>From scratch</strong></li>
+                    <li>Go to <strong>OAuth & Permissions</strong></li>
+                    <li>Copy the <strong>Client ID</strong></li>
+                    <li>Copy the <strong>Client Secret</strong></li>
+                    <li>Add required scopes (e.g., chat:write, channels:read)</li>
+                </ol>
+            </div>
+
+            <div class="redirect-uri-box">
+                <strong>⚠️ Add this Redirect URL in Slack App:</strong>
+                <code>http://localhost:8084/api/v1/oauth/callback/slack</code>
+            </div>
+
+            <form id="slack-setup-form">
+                <div class="setup-form-group">
+                    <label for="slack-client-id">Client ID *</label>
+                    <input type="text" id="slack-client-id" required placeholder="123456789012.1234567890123">
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="slack-client-secret">Client Secret *</label>
+                    <input type="password" id="slack-client-secret" required
+                        placeholder="abcdef1234567890abcdef1234567890">
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="slack-org-id">Organization ID *</label>
+                    <input type="text" id="slack-org-id" required value="default">
+                </div>
+
+                <div class="setup-status" id="slack-setup-status"></div>
+
+                <div style="margin-top: 25px;">
+                    <button type="button" class="setup-btn setup-btn-secondary"
+                        onclick="closeConnectorSetup('slack')">Cancel</button>
+                    <button type="submit" class="setup-btn setup-btn-primary">Save Configuration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Jira Setup Modal -->
+    <div id="jira-setup-modal" class="connector-setup-modal">
+        <div class="connector-setup-content">
+            <div class="connector-setup-header">
+                <h2>
+                    <div class="connector-icon-large jira">
+                        <i class="fab fa-jira"></i>
+                    </div>
+                    Jira Setup
+                </h2>
+                <button class="connector-close-btn" onclick="closeConnectorSetup('jira')">&times;</button>
+            </div>
+
+            <div class="setup-instructions">
+                <h4>📋 How to get your credentials:</h4>
+                <ol>
+                    <li>Go to <a href="https://developer.atlassian.com/console/myapps/" target="_blank">Atlassian
+                            Developer Console</a></li>
+                    <li>Click <strong>Create</strong> → <strong>OAuth 2.0 integration</strong></li>
+                    <li>Copy the <strong>Client ID</strong></li>
+                    <li>Generate and copy the <strong>Client Secret</strong></li>
+                    <li>Enable <strong>Jira API</strong> permissions</li>
+                </ol>
+            </div>
+
+            <div class="redirect-uri-box">
+                <strong>⚠️ Add this Callback URL in Atlassian App:</strong>
+                <code>http://localhost:8084/api/v1/oauth/callback/jira</code>
+            </div>
+
+            <form id="jira-setup-form">
+                <div class="setup-form-group">
+                    <label for="jira-client-id">Client ID *</label>
+                    <input type="text" id="jira-client-id" required placeholder="YOUR_JIRA_CLIENT_ID">
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="jira-client-secret">Client Secret *</label>
+                    <input type="password" id="jira-client-secret" required placeholder="YOUR_JIRA_CLIENT_SECRET">
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="jira-org-id">Organization ID *</label>
+                    <input type="text" id="jira-org-id" required value="default">
+                </div>
+
+                <div class="setup-status" id="jira-setup-status"></div>
+
+                <div style="margin-top: 25px;">
+                    <button type="button" class="setup-btn setup-btn-secondary"
+                        onclick="closeConnectorSetup('jira')">Cancel</button>
+                    <button type="submit" class="setup-btn setup-btn-primary">Save Configuration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ServiceNow Setup Modal -->
+    <div id="servicenow-setup-modal" class="connector-setup-modal">
+        <div class="connector-setup-content">
+            <div class="connector-setup-header">
+                <h2>
+                    <div class="connector-icon-large servicenow">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    ServiceNow Setup
+                </h2>
+                <button class="connector-close-btn" onclick="closeConnectorSetup('servicenow')">&times;</button>
+            </div>
+
+            <div class="setup-instructions">
+                <h4>📋 How to get your credentials:</h4>
+                <ol>
+                    <li>Log in to your ServiceNow instance</li>
+                    <li>Go to <strong>System OAuth</strong> → <strong>Application Registry</strong></li>
+                    <li>Click <strong>New</strong> → <strong>Create an OAuth API endpoint</strong></li>
+                    <li>Copy the <strong>Client ID</strong></li>
+                    <li>Copy the <strong>Client Secret</strong></li>
+                </ol>
+            </div>
+
+            <div class="redirect-uri-box">
+                <strong>⚠️ Add this Redirect URL in ServiceNow:</strong>
+                <code>http://localhost:8084/api/v1/oauth/callback/servicenow</code>
+            </div>
+
+            <form id="servicenow-setup-form">
+                <div class="setup-form-group">
+                    <label for="servicenow-instance">Instance URL *</label>
+                    <input type="url" id="servicenow-instance" required
+                        placeholder="https://yourinstance.service-now.com">
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="servicenow-client-id">Client ID *</label>
+                    <input type="text" id="servicenow-client-id" required placeholder="YOUR_SERVICENOW_CLIENT_ID">
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="servicenow-client-secret">Client Secret *</label>
+                    <input type="password" id="servicenow-client-secret" required
+                        placeholder="YOUR_SERVICENOW_CLIENT_SECRET">
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="servicenow-org-id">Organization ID *</label>
+                    <input type="text" id="servicenow-org-id" required value="default">
+                </div>
+
+                <div class="setup-status" id="servicenow-setup-status"></div>
+
+                <div style="margin-top: 25px;">
+                    <button type="button" class="setup-btn setup-btn-secondary"
+                        onclick="closeConnectorSetup('servicenow')">Cancel</button>
+                    <button type="submit" class="setup-btn setup-btn-primary">Save Configuration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confluence Setup Modal -->
+    <div id="confluence-setup-modal" class="connector-setup-modal">
+        <div class="connector-setup-content">
+            <div class="connector-setup-header">
+                <h2>
+                    <div class="connector-icon-large confluence">
+                        <i class="fab fa-confluence"></i>
+                    </div>
+                    Confluence Setup
+                </h2>
+                <button class="connector-close-btn" onclick="closeConnectorSetup('confluence')">&times;</button>
+            </div>
+
+            <div class="setup-instructions">
+                <h4>📋 How to get your credentials:</h4>
+                <ol>
+                    <li>Go to <a href="https://developer.atlassian.com/console/myapps/" target="_blank">Atlassian
+                            Developer Console</a></li>
+                    <li>Click <strong>Create</strong> → <strong>OAuth 2.0 integration</strong></li>
+                    <li>Copy the <strong>Client ID</strong></li>
+                    <li>Generate and copy the <strong>Client Secret</strong></li>
+                    <li>Enable <strong>Confluence API</strong> permissions</li>
+                </ol>
+            </div>
+
+            <div class="redirect-uri-box">
+                <strong>⚠️ Add this Callback URL in Atlassian App:</strong>
+                <code>http://localhost:8084/api/v1/oauth/callback/confluence</code>
+            </div>
+
+            <form id="confluence-setup-form">
+                <div class="setup-form-group">
+                    <label for="confluence-client-id">Client ID *</label>
+                    <input type="text" id="confluence-client-id" required placeholder="YOUR_CONFLUENCE_CLIENT_ID">
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="confluence-client-secret">Client Secret *</label>
+                    <input type="password" id="confluence-client-secret" required
+                        placeholder="YOUR_CONFLUENCE_CLIENT_SECRET">
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="confluence-org-id">Organization ID *</label>
+                    <input type="text" id="confluence-org-id" required value="default">
+                </div>
+
+                <div class="setup-status" id="confluence-setup-status"></div>
+
+                <div style="margin-top: 25px;">
+                    <button type="button" class="setup-btn setup-btn-secondary"
+                        onclick="closeConnectorSetup('confluence')">Cancel</button>
+                    <button type="submit" class="setup-btn setup-btn-primary">Save Configuration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SharePoint Setup Modal -->
+    <div id="sharepoint-setup-modal" class="connector-setup-modal">
+        <div class="connector-setup-content">
+            <div class="connector-setup-header">
+                <h2>
+                    <div class="connector-icon-large sharepoint">
+                        <i class="fab fa-microsoft"></i>
+                    </div>
+                    SharePoint Setup
+                </h2>
+                <button class="connector-close-btn" onclick="closeConnectorSetup('sharepoint')">&times;</button>
+            </div>
+
+            <div class="setup-instructions">
+                <h4>📋 How to get your credentials:</h4>
+                <ol>
+                    <li>Go to <a href="https://portal.azure.com" target="_blank">Azure Portal</a></li>
+                    <li>Navigate to <strong>App registrations</strong></li>
+                    <li>Click <strong>+ New registration</strong></li>
+                    <li>Copy the <strong>Application (client) ID</strong></li>
+                    <li>Copy the <strong>Directory (tenant) ID</strong></li>
+                    <li>Go to <strong>Certificates & secrets</strong> → <strong>+ New client secret</strong></li>
+                    <li>Add <strong>SharePoint API</strong> permissions</li>
+                </ol>
+            </div>
+
+            <div class="redirect-uri-box">
+                <strong>⚠️ Add this Redirect URI in Azure:</strong>
+                <code>http://localhost:8084/api/v1/oauth/callback/sharepoint</code>
+            </div>
+
+            <form id="sharepoint-setup-form">
+                <div class="setup-form-group">
+                    <label for="sharepoint-client-id">Client ID (Application ID) *</label>
+                    <input type="text" id="sharepoint-client-id" required
+                        placeholder="12345678-abcd-1234-5678-123456789abc">
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="sharepoint-client-secret">Client Secret *</label>
+                    <input type="password" id="sharepoint-client-secret" required
+                        placeholder="Your Azure client secret">
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="sharepoint-tenant-id">Tenant ID *</label>
+                    <input type="text" id="sharepoint-tenant-id" required placeholder="common">
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="sharepoint-org-id">Organization ID *</label>
+                    <input type="text" id="sharepoint-org-id" required value="default">
+                </div>
+
+                <div class="setup-status" id="sharepoint-setup-status"></div>
+
+                <div style="margin-top: 25px;">
+                    <button type="button" class="setup-btn setup-btn-secondary"
+                        onclick="closeConnectorSetup('sharepoint')">Cancel</button>
+                    <button type="submit" class="setup-btn setup-btn-primary">Save Configuration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- GitHub Setup Modal -->
+    <div id="github-setup-modal" class="connector-setup-modal">
+        <div class="connector-setup-content">
+            <div class="connector-setup-header">
+                <h2>
+                    <div class="connector-icon-large github">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    GitHub Setup
+                </h2>
+                <button class="connector-close-btn" onclick="closeConnectorSetup('github')">&times;</button>
+            </div>
+
+            <div class="setup-instructions">
+                <h4>📋 How to get your credentials:</h4>
+                <ol>
+                    <li>Go to <a href="https://github.com/settings/developers" target="_blank">GitHub Developer
+                            Settings</a></li>
+                    <li>Click <strong>OAuth Apps</strong> → <strong>New OAuth App</strong></li>
+                    <li>Fill in Application name and Homepage URL</li>
+                    <li>Copy the <strong>Client ID</strong></li>
+                    <li>Click <strong>Generate a new client secret</strong></li>
+                    <li>Copy the <strong>Client Secret</strong> immediately</li>
+                </ol>
+            </div>
+
+            <div class="redirect-uri-box">
+                <strong>⚠️ Add this Authorization callback URL in GitHub:</strong>
+                <code>http://localhost:8084/api/v1/oauth/callback/github</code>
+            </div>
+
+            <form id="github-setup-form">
+                <div class="setup-form-group">
+                    <label for="github-client-id">Client ID *</label>
+                    <input type="text" id="github-client-id" required placeholder="Iv1.1234567890abcdef">
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="github-client-secret">Client Secret *</label>
+                    <input type="password" id="github-client-secret" required
+                        placeholder="abcdef1234567890abcdef1234567890abcdef12">
+                </div>
+
+                <div class="setup-form-group">
+                    <label for="github-org-id">Organization ID *</label>
+                    <input type="text" id="github-org-id" required value="default">
+                </div>
+
+                <div class="setup-status" id="github-setup-status"></div>
+
+                <div style="margin-top: 25px;">
+                    <button type="button" class="setup-btn setup-btn-secondary"
+                        onclick="closeConnectorSetup('github')">Cancel</button>
+                    <button type="submit" class="setup-btn setup-btn-primary">Save Configuration</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Connector Setup Functions
+        function openConnectorSetup(connectorType) {
+            const modal = document.getElementById(`${connectorType}-setup-modal`);
+            if (modal) {
+                modal.classList.add('active');
+                const form = document.getElementById(`${connectorType}-setup-form`);
+                if (form) form.reset();
+                const status = document.getElementById(`${connectorType}-setup-status`);
+                if (status) {
+                    status.className = 'setup-status';
+                    status.textContent = '';
+                }
+            }
+        }
+
+        function closeConnectorSetup(connectorType) {
+            const modal = document.getElementById(`${connectorType}-setup-modal`);
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+
+        // Microsoft Setup Form Handler
+        document.getElementById('microsoft-setup-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const clientId = document.getElementById('microsoft-client-id').value.trim();
+            const clientSecret = document.getElementById('microsoft-client-secret').value.trim();
+            const tenantId = document.getElementById('microsoft-tenant-id').value.trim();
+            const orgId = document.getElementById('microsoft-org-id').value.trim();
+            const statusDiv = document.getElementById('microsoft-setup-status');
+
+            const guidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+            if (!guidPattern.test(clientId)) {
+                statusDiv.className = 'setup-status error';
+                statusDiv.textContent = '❌ Invalid Client ID format. Must be a GUID.';
+                return;
+            }
+
+            if (!guidPattern.test(tenantId) && tenantId.toLowerCase() !== 'common') {
+                statusDiv.className = 'setup-status error';
+                statusDiv.textContent = '❌ Invalid Tenant ID format. Must be a GUID or "common".';
+                return;
+            }
+
+            try {
+                statusDiv.className = 'setup-status';
+                statusDiv.textContent = '⏳ Saving configuration...';
+                statusDiv.style.display = 'block';
+
+                const response = await fetch('/api/v1/oauth/setup/microsoft', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ client_id: clientId, client_secret: clientSecret, tenant_id: tenantId, org_id: orgId })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    statusDiv.className = 'setup-status success';
+                    statusDiv.innerHTML = `✅ Configuration saved successfully!<br>Config file: config/oauth/microsoft_${orgId}.json`;
+                    setTimeout(() => closeConnectorSetup('microsoft'), 2000);
+                } else {
+                    statusDiv.className = 'setup-status error';
+                    statusDiv.textContent = `❌ Error: ${data.detail || 'Failed to save'}`;
+                }
+            } catch (error) {
+                statusDiv.className = 'setup-status error';
+                statusDiv.textContent = `❌ Error: ${error.message}`;
+            }
+        });
+
+        // Slack Setup Form Handler
+        document.getElementById('slack-setup-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const clientId = document.getElementById('slack-client-id').value.trim();
+            const clientSecret = document.getElementById('slack-client-secret').value.trim();
+            const statusDiv = document.getElementById('slack-setup-status');
+
+            if (!isAuthenticated()) {
+                statusDiv.className = 'setup-status error';
+                statusDiv.textContent = '❌ Please login first';
+                statusDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                statusDiv.className = 'setup-status';
+                statusDiv.textContent = '⏳ Saving configuration...';
+                statusDiv.style.display = 'block';
+
+                const response = await fetch('/api/v1/oauth/setup/slack', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ client_id: clientId, client_secret: clientSecret })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const user = getAuthUser();
+                    statusDiv.className = 'setup-status success';
+                    statusDiv.innerHTML = `✅ Slack connector configured!<br>Org: ${user.org_id}<br>File: ${data.config_file}`;
+                    setTimeout(() => closeConnectorSetup('slack'), 2000);
+                } else {
+                    statusDiv.className = 'setup-status error';
+                    statusDiv.textContent = `❌ Error: ${data.detail || 'Failed to save'}`;
+                }
+            } catch (error) {
+                statusDiv.className = 'setup-status error';
+                statusDiv.textContent = `❌ Error: ${error.message}`;
+            }
+        });
+
+        // Jira Setup Form Handler
+        document.getElementById('jira-setup-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const statusDiv = document.getElementById('jira-setup-status');
+            statusDiv.className = 'setup-status success';
+            statusDiv.innerHTML = '✅ Jira connector setup completed! (Demo mode)';
+            statusDiv.style.display = 'block';
+            setTimeout(() => closeConnectorSetup('jira'), 2000);
+        });
+
+        // ServiceNow Setup Form Handler
+        document.getElementById('servicenow-setup-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const statusDiv = document.getElementById('servicenow-setup-status');
+            statusDiv.className = 'setup-status success';
+            statusDiv.innerHTML = '✅ ServiceNow connector setup completed! (Demo mode)';
+            statusDiv.style.display = 'block';
+            setTimeout(() => closeConnectorSetup('servicenow'), 2000);
+        });
+
+        // Confluence Setup Form Handler
+        document.getElementById('confluence-setup-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const statusDiv = document.getElementById('confluence-setup-status');
+            statusDiv.className = 'setup-status success';
+            statusDiv.innerHTML = '✅ Confluence connector setup completed! (Demo mode)';
+            statusDiv.style.display = 'block';
+            setTimeout(() => closeConnectorSetup('confluence'), 2000);
+        });
+
+        // SharePoint Setup Form Handler
+        document.getElementById('sharepoint-setup-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const statusDiv = document.getElementById('sharepoint-setup-status');
+            statusDiv.className = 'setup-status success';
+            statusDiv.innerHTML = '✅ SharePoint connector setup completed! (Demo mode)';
+            statusDiv.style.display = 'block';
+            setTimeout(() => closeConnectorSetup('sharepoint'), 2000);
+        });
+
+        // GitHub Setup Form Handler
+        document.getElementById('github-setup-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const statusDiv = document.getElementById('github-setup-status');
+            statusDiv.className = 'setup-status success';
+            statusDiv.innerHTML = '✅ GitHub connector setup completed! (Demo mode)';
+            statusDiv.style.display = 'block';
+            setTimeout(() => closeConnectorSetup('github'), 2000);
+        });
+
+        // Google Setup Form Handler
+        document.getElementById('google-setup-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const clientId = document.getElementById('google-client-id').value.trim();
+            const clientSecret = document.getElementById('google-client-secret').value.trim();
+            const statusDiv = document.getElementById('google-setup-status');
+
+            if (!clientId.endsWith('.apps.googleusercontent.com')) {
+                statusDiv.className = 'setup-status error';
+                statusDiv.textContent = '❌ Invalid Client ID. Must end with .apps.googleusercontent.com';
+                statusDiv.style.display = 'block';
+                return;
+            }
+
+            // Check authentication
+            if (!isAuthenticated()) {
+                statusDiv.className = 'setup-status error';
+                statusDiv.textContent = '❌ Please login first';
+                statusDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                statusDiv.className = 'setup-status';
+                statusDiv.textContent = '⏳ Saving configuration...';
+                statusDiv.style.display = 'block';
+
+                const response = await fetch('/api/v1/oauth/setup/google', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ client_id: clientId, client_secret: clientSecret })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const user = getAuthUser();
+                    statusDiv.className = 'setup-status success';
+                    statusDiv.innerHTML = `✅ Configuration saved successfully!<br>Org: ${user.org_id}<br>Config file: ${data.config_file}`;
+                    setTimeout(() => closeConnectorSetup('google'), 2000);
+                } else {
+                    statusDiv.className = 'setup-status error';
+                    statusDiv.textContent = `❌ Error: ${data.detail || 'Failed to save'}`;
+                }
+            } catch (error) {
+                statusDiv.className = 'setup-status error';
+                statusDiv.textContent = `❌ Error: ${error.message}`;
+            }
+        });
+    </script>
+
 </body>
 
 </html>

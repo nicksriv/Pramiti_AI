@@ -1,0 +1,609 @@
+<!-- Connector Setup Modals -->
+<!-- This file contains setup forms for each connector type -->
+
+<style>
+    .connector-setup-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .connector-setup-modal.active {
+        display: flex;
+    }
+
+    .connector-setup-content {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .connector-setup-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .connector-setup-header h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .connector-icon-large {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    .connector-icon-large.microsoft {
+        background: linear-gradient(135deg, #0078d4, #00bcf2);
+        color: white;
+    }
+
+    .connector-icon-large.google {
+        background: linear-gradient(135deg, #4285f4, #34a853);
+        color: white;
+    }
+
+    .connector-close-btn {
+        background: none;
+        border: none;
+        font-size: 28px;
+        cursor: pointer;
+        color: #999;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s;
+    }
+
+    .connector-close-btn:hover {
+        background: #f0f0f0;
+        color: #333;
+    }
+
+    .setup-form-group {
+        margin-bottom: 20px;
+    }
+
+    .setup-form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+        font-size: 14px;
+    }
+
+    .setup-form-group input,
+    .setup-form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    .setup-form-group input:focus,
+    .setup-form-group select:focus {
+        outline: none;
+        border-color: #0078d4;
+        box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1);
+    }
+
+    .setup-form-group .help-text {
+        font-size: 12px;
+        color: #666;
+        margin-top: 6px;
+        display: block;
+    }
+
+    .setup-form-group .help-link {
+        color: #0078d4;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .setup-form-group .help-link:hover {
+        text-decoration: underline;
+    }
+
+    .setup-instructions {
+        background: #f8f9fa;
+        border-left: 4px solid #0078d4;
+        padding: 15px;
+        margin-bottom: 25px;
+        border-radius: 4px;
+    }
+
+    .setup-instructions h4 {
+        margin: 0 0 10px 0;
+        color: #0078d4;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .setup-instructions ol {
+        margin: 0;
+        padding-left: 20px;
+    }
+
+    .setup-instructions li {
+        margin-bottom: 8px;
+        font-size: 13px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .setup-instructions code {
+        background: #e9ecef;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+    }
+
+    .setup-form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #f0f0f0;
+    }
+
+    .setup-btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .setup-btn-primary {
+        background: linear-gradient(135deg, #0078d4, #00bcf2);
+        color: white;
+    }
+
+    .setup-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 120, 212, 0.3);
+    }
+
+    .setup-btn-secondary {
+        background: #f0f0f0;
+        color: #333;
+    }
+
+    .setup-btn-secondary:hover {
+        background: #e0e0e0;
+    }
+
+    .setup-status {
+        margin-top: 15px;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 14px;
+        display: none;
+    }
+
+    .setup-status.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+        display: block;
+    }
+
+    .setup-status.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+        display: block;
+    }
+
+    .redirect-uri-box {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .redirect-uri-box strong {
+        display: block;
+        margin-bottom: 8px;
+        color: #856404;
+    }
+
+    .redirect-uri-box code {
+        display: block;
+        background: white;
+        padding: 10px;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        color: #333;
+        word-break: break-all;
+        border: 1px solid #ffc107;
+    }
+</style>
+
+<!-- Microsoft 365 Setup Modal -->
+<div id="microsoft-setup-modal" class="connector-setup-modal">
+    <div class="connector-setup-content">
+        <div class="connector-setup-header">
+            <h2>
+                <div class="connector-icon-large microsoft">
+                    <i class="fab fa-microsoft"></i>
+                </div>
+                Microsoft 365 Setup
+            </h2>
+            <button class="connector-close-btn" onclick="closeConnectorSetup('microsoft')">&times;</button>
+        </div>
+
+        <div class="setup-instructions">
+            <h4>📋 How to get your credentials:</h4>
+            <ol>
+                <li>Go to <a href="https://portal.azure.com" target="_blank" class="help-link">Azure Portal</a></li>
+                <li>Navigate to <strong>App registrations</strong></li>
+                <li>Click <strong>+ New registration</strong></li>
+                <li>Name your app (e.g., "Pramiti AI Integration")</li>
+                <li>Copy the <code>Application (client) ID</code></li>
+                <li>Copy the <code>Directory (tenant) ID</code></li>
+                <li>Go to <strong>Certificates & secrets</strong> → <strong>+ New client secret</strong></li>
+                <li>Copy the secret <strong>Value</strong> immediately</li>
+            </ol>
+        </div>
+
+        <div class="redirect-uri-box">
+            <strong>⚠️ Add this Redirect URI in Azure:</strong>
+            <code id="microsoft-redirect-uri">http://localhost:8084/api/v1/oauth/callback/microsoft</code>
+        </div>
+
+        <form id="microsoft-setup-form">
+            <div class="setup-form-group">
+                <label for="microsoft-client-id">Client ID (Application ID) *</label>
+                <input type="text" id="microsoft-client-id" required placeholder="12345678-abcd-1234-5678-123456789abc"
+                    pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}">
+                <span class="help-text">Format: GUID (e.g., 12345678-abcd-1234-5678-123456789abc)</span>
+            </div>
+
+            <div class="setup-form-group">
+                <label for="microsoft-client-secret">Client Secret *</label>
+                <input type="password" id="microsoft-client-secret" required placeholder="Your Azure client secret"
+                    minlength="10">
+                <span class="help-text">The secret value from Azure (not the Secret ID)</span>
+            </div>
+
+            <div class="setup-form-group">
+                <label for="microsoft-tenant-id">Tenant ID (Directory ID) *</label>
+                <input type="text" id="microsoft-tenant-id" required placeholder="87654321-dcba-4321-4321-cba987654321"
+                    pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|common">
+                <span class="help-text">Format: GUID or "common" for multi-tenant</span>
+            </div>
+
+            <div class="setup-form-group">
+                <label for="microsoft-org-id">Organization ID *</label>
+                <input type="text" id="microsoft-org-id" required placeholder="default" value="default">
+                <span class="help-text">Use "default" for main organization</span>
+            </div>
+
+            <div class="setup-status" id="microsoft-setup-status"></div>
+
+            <div class="setup-form-actions">
+                <button type="button" class="setup-btn setup-btn-secondary" onclick="closeConnectorSetup('microsoft')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="submit" class="setup-btn setup-btn-primary">
+                    <i class="fas fa-check"></i>
+                    Save Configuration
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Google Workspace Setup Modal -->
+<div id="google-setup-modal" class="connector-setup-modal">
+    <div class="connector-setup-content">
+        <div class="connector-setup-header">
+            <h2>
+                <div class="connector-icon-large google">
+                    <i class="fab fa-google"></i>
+                </div>
+                Google Workspace Setup
+            </h2>
+            <button class="connector-close-btn" onclick="closeConnectorSetup('google')">&times;</button>
+        </div>
+
+        <div class="setup-instructions">
+            <h4>📋 How to get your credentials:</h4>
+            <ol>
+                <li>Go to <a href="https://console.cloud.google.com" target="_blank" class="help-link">Google Cloud
+                        Console</a></li>
+                <li>Create a new project or select existing</li>
+                <li>Enable <strong>Gmail API</strong>, <strong>Drive API</strong>, <strong>Calendar API</strong></li>
+                <li>Go to <strong>APIs & Services</strong> → <strong>Credentials</strong></li>
+                <li>Click <strong>+ CREATE CREDENTIALS</strong> → <strong>OAuth client ID</strong></li>
+                <li>Application type: <strong>Web application</strong></li>
+                <li>Copy the <code>Client ID</code> and <code>Client secret</code></li>
+            </ol>
+        </div>
+
+        <div class="redirect-uri-box">
+            <strong>⚠️ Add this Authorized redirect URI in Google Cloud Console:</strong>
+            <code id="google-redirect-uri">http://localhost:8084/api/v1/oauth/callback/google</code>
+        </div>
+
+        <form id="google-setup-form">
+            <div class="setup-form-group">
+                <label for="google-client-id">Client ID *</label>
+                <input type="text" id="google-client-id" required placeholder="123456789-abc.apps.googleusercontent.com"
+                    pattern=".+\.apps\.googleusercontent\.com$">
+                <span class="help-text">Format: xxx.apps.googleusercontent.com</span>
+            </div>
+
+            <div class="setup-form-group">
+                <label for="google-client-secret">Client Secret *</label>
+                <input type="password" id="google-client-secret" required placeholder="GOCSPX-xxxxxxxxxxxxxxxxxxxx"
+                    minlength="10">
+                <span class="help-text">Usually starts with GOCSPX-</span>
+            </div>
+
+            <div class="setup-form-group">
+                <label for="google-org-id">Organization ID *</label>
+                <input type="text" id="google-org-id" required placeholder="default" value="default">
+                <span class="help-text">Use "default" for main organization</span>
+            </div>
+
+            <div class="setup-status" id="google-setup-status"></div>
+
+            <div class="setup-form-actions">
+                <button type="button" class="setup-btn setup-btn-secondary" onclick="closeConnectorSetup('google')">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button type="submit" class="setup-btn setup-btn-primary">
+                    <i class="fas fa-check"></i>
+                    Save Configuration
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Connector setup JavaScript
+    function openConnectorSetup(connectorType) {
+        const modal = document.getElementById(`${connectorType}-setup-modal`);
+        if (modal) {
+            modal.classList.add('active');
+            // Reset form
+            const form = document.getElementById(`${connectorType}-setup-form`);
+            if (form) form.reset();
+            // Clear status
+            const status = document.getElementById(`${connectorType}-setup-status`);
+            if (status) {
+                status.className = 'setup-status';
+                status.textContent = '';
+            }
+        }
+    }
+
+    function closeConnectorSetup(connectorType) {
+        const modal = document.getElementById(`${connectorType}-setup-modal`);
+        if (modal) {
+            modal.classList.remove('active');
+        }
+    }
+
+    // Microsoft 365 Setup Form Handler
+    document.getElementById('microsoft-setup-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const clientId = document.getElementById('microsoft-client-id').value.trim();
+        const clientSecret = document.getElementById('microsoft-client-secret').value.trim();
+        const tenantId = document.getElementById('microsoft-tenant-id').value.trim();
+        const orgId = document.getElementById('microsoft-org-id').value.trim();
+        const statusDiv = document.getElementById('microsoft-setup-status');
+
+        // Validate GUID format
+        const guidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+        if (!guidPattern.test(clientId)) {
+            statusDiv.className = 'setup-status error';
+            statusDiv.textContent = '❌ Invalid Client ID format. Must be a GUID.';
+            return;
+        }
+
+        if (!guidPattern.test(tenantId) && tenantId.toLowerCase() !== 'common') {
+            statusDiv.className = 'setup-status error';
+            statusDiv.textContent = '❌ Invalid Tenant ID format. Must be a GUID or "common".';
+            return;
+        }
+
+        try {
+            statusDiv.className = 'setup-status';
+            statusDiv.textContent = '⏳ Saving configuration...';
+
+            const response = await fetch('/api/v1/oauth/setup/microsoft', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    client_id: clientId,
+                    client_secret: clientSecret,
+                    tenant_id: tenantId,
+                    org_id: orgId
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                statusDiv.className = 'setup-status success';
+                statusDiv.innerHTML = `
+                ✅ <strong>Configuration saved successfully!</strong><br>
+                Config file: config/oauth/microsoft_${orgId}.json<br>
+                You can now connect Microsoft 365 services.
+            `;
+
+                // Reload connectors after 2 seconds
+                setTimeout(() => {
+                    closeConnectorSetup('microsoft');
+                    loadConnectors();
+                }, 2000);
+            } else {
+                statusDiv.className = 'setup-status error';
+                statusDiv.textContent = `❌ Error: ${data.error || 'Failed to save configuration'}`;
+            }
+        } catch (error) {
+            statusDiv.className = 'setup-status error';
+            statusDiv.textContent = `❌ Error: ${error.message}`;
+        }
+    });
+
+    // Google Workspace Setup Form Handler
+    document.getElementById('google-setup-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const clientId = document.getElementById('google-client-id').value.trim();
+        const clientSecret = document.getElementById('google-client-secret').value.trim();
+        const orgId = document.getElementById('google-org-id').value.trim();
+        const statusDiv = document.getElementById('google-setup-status');
+
+        // Validate Google Client ID format
+        if (!clientId.endsWith('.apps.googleusercontent.com')) {
+            statusDiv.className = 'setup-status error';
+            statusDiv.textContent = '❌ Invalid Client ID format. Must end with .apps.googleusercontent.com';
+            return;
+        }
+
+        try {
+            statusDiv.className = 'setup-status';
+            statusDiv.textContent = '⏳ Saving configuration...';
+
+            const response = await fetch('/api/v1/oauth/setup/google', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    client_id: clientId,
+                    client_secret: clientSecret,
+                    org_id: orgId
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                statusDiv.className = 'setup-status success';
+                statusDiv.innerHTML = `
+                ✅ <strong>Configuration saved successfully!</strong><br>
+                Config file: config/oauth/google_${orgId}.json<br>
+                You can now connect Google Workspace services.
+            `;
+
+                // Reload connectors after 2 seconds
+                setTimeout(() => {
+                    closeConnectorSetup('google');
+                    loadConnectors();
+                }, 2000);
+            } else {
+                statusDiv.className = 'setup-status error';
+                statusDiv.textContent = `❌ Error: ${data.error || 'Failed to save configuration'}`;
+            }
+        } catch (error) {
+            statusDiv.className = 'setup-status error';
+            statusDiv.textContent = `❌ Error: ${error.message}`;
+        }
+    });
+
+    // Load available connectors
+    function loadConnectors() {
+        const connectorsGrid = document.getElementById('available-connectors');
+        if (!connectorsGrid) return;
+
+        const connectors = [
+            {
+                id: 'microsoft',
+                name: 'Microsoft 365',
+                icon: 'fab fa-microsoft',
+                color: '#0078d4',
+                description: 'Outlook, Teams, OneDrive, Calendar',
+                capabilities: ['Email', 'Chat', 'Files', 'Calendar'],
+                configured: false
+            },
+            {
+                id: 'google',
+                name: 'Google Workspace',
+                icon: 'fab fa-google',
+                color: '#4285f4',
+                description: 'Gmail, Drive, Calendar, Meet',
+                capabilities: ['Email', 'Files', 'Calendar', 'Video'],
+                configured: false
+            }
+        ];
+
+        connectorsGrid.innerHTML = connectors.map(connector => `
+        <div class="connector-card">
+            <div class="connector-header">
+                <div class="connector-icon" style="background: ${connector.color}">
+                    <i class="${connector.icon}"></i>
+                </div>
+                <div class="connector-info">
+                    <h3>${connector.name}</h3>
+                    <p>${connector.description}</p>
+                </div>
+            </div>
+            <div class="connector-capabilities">
+                ${connector.capabilities.map(cap => `<span class="capability-badge">${cap}</span>`).join('')}
+            </div>
+            <div class="connector-actions">
+                <button class="connector-btn ${connector.configured ? 'btn-success' : 'btn-primary'}" 
+                        onclick="openConnectorSetup('${connector.id}')">
+                    <i class="fas fa-${connector.configured ? 'check' : 'plug'}"></i>
+                    ${connector.configured ? 'Configured' : 'Setup'}
+                </button>
+            </div>
+        </div>
+    `).join('');
+    }
+
+    // Load connectors on page load
+    document.addEventListener('DOMContentLoaded', loadConnectors);
+</script>

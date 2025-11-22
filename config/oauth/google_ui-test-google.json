@@ -1,0 +1,6 @@
+{
+  "provider": "google",
+  "client_id": "987654321-xyz.apps.googleusercontent.com",
+  "client_secret": "TEST_SECRET_GOOGLE",
+  "redirect_uri": "http://localhost:8084/api/v1/oauth/callback/google"
+}

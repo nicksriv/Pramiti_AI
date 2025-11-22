@@ -5,7 +5,7 @@ Handles user authentication through natural conversation
 
 import re
 from typing import Dict, Any, Optional
-from core.base_agent import BaseAgent, Message, MessageType
+from core.base_agent import BaseAgent, Message, MessageType, AgentRole
 
 
 class OAuthAssistantAgent(BaseAgent):
@@ -19,7 +19,7 @@ class OAuthAssistantAgent(BaseAgent):
             agent_id="oauth-assistant-001",
             name="OAuth Authentication Assistant",
             specialization="User authentication and access management",
-            role="assistant"
+            role=AgentRole.SUBJECT_MATTER_EXPERT
         )
         
         # Track authentication sessions

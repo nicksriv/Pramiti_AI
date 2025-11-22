@@ -1,0 +1,22 @@
+{
+  "conversation_id": "conv_1763770953.730806",
+  "org_id": "tenant-a",
+  "created_at": "2025-11-22T05:52:42.333045",
+  "messages": [
+    {
+      "doc_id": "5d14e7a78733874f",
+      "timestamp": "2025-11-22T05:52:42.333060",
+      "user_message": "hi setup microsoft",
+      "ai_response": "Hello! To help you set up a Microsoft service or integration, I'll need a bit more information about what specific Microsoft product or service you're looking to set up and integrate. Microsoft offers a wide range of services such as Microsoft 365 (which includes Outlook, Teams, SharePoint, and OneDrive), Azure, Dynamics 365, and many others. \n\nAdditionally, it would be helpful to know the platform or service you're aiming to integrate with (e.g., integrating Microsoft Teams into a project management tool or setting up Microsoft Outlook email for your organization).\n\nCould you please provide more details on the following:\n\n1. The specific Microsoft product or service you want to set up.\n2. The platform or system you're integrating with, if applicable.\n3. Any specific goals or requirements you have for this setup (e.g., automating workflows, setting up single sign-on, etc.).\n\nThis information will help me provide you with more targeted assistance.",
+      "rating": null,
+      "feedback": null,
+      "metadata": {
+        "context_used": false,
+        "context_length": 0,
+        "model": "gpt-4-turbo-preview",
+        "tokens_used": 248
+      }
+    }
+  ],
+  "updated_at": "2025-11-22T05:52:42.333092"
+}

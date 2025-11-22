@@ -9,10 +9,12 @@ import logging
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 import json
+from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Form, UploadFile, File
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Form, UploadFile, File, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
@@ -25,6 +27,14 @@ from core.base_agent import Message, MessageType
 from core.connectors import (
     connector_manager, ConnectorType, AuthType, ConnectorStatus,
     PermissionScope, STANDARD_CONNECTORS
+)
+from core.session_manager import session_manager
+from core.connector_manager import connector_manager as mt_connector_manager
+from core.rag_knowledge_base import rag_knowledge_base
+from core.rbac import (
+    Role, Permission, rbac_manager,
+    require_permission, require_role, require_any_permission,
+    audit_action
 )
 
 # Load environment variables
@@ -66,6 +76,8 @@ class ChatMessage(BaseModel):
     message: str
     user_id: str = "user"
     session_id: Optional[str] = None
+    role: Optional[str] = None  # User role for context-aware routing
+    org_id: Optional[str] = None  # Organization ID for tenant-specific guidance
 
 class AgentResponse(BaseModel):
     agent_id: str
@@ -181,6 +193,23 @@ custom_roles: Dict[str, RoleDefinition] = {
 # Track agent enabled/disabled status
 agent_status: Dict[str, bool] = {}
 
+# Multi-tenant authentication helper
+async def get_current_user(authorization: Optional[str] = Header(None)):
+    """Get current user from Authorization header (required)"""
+    return session_manager.get_current_user_from_token(authorization)
+
+async def get_current_user_optional(authorization: Optional[str] = Header(None)):
+    """Get current user from Authorization header (optional - returns default if not authenticated)"""
+    try:
+        return session_manager.get_current_user_from_token(authorization)
+    except:
+        # Return default user for unauthenticated requests
+        return {
+            "user_id": "anonymous",
+            "org_id": "default",
+            "role": "user"
+        }
+
 # Initialize agents on startup
 @app.on_event("startup")
 async def startup_event():
@@ -288,7 +317,8 @@ async def serve_index():
     return FileResponse("web/index.html")
 
 @app.get("/agents", response_model=List[AgentInfo])
-async def get_agents(include_disabled: bool = False):
+@require_permission(Permission.VIEW_AGENTS)
+async def get_agents(include_disabled: bool = False, current_user: dict = Depends(get_current_user)):
     """Get list of available agents"""
     agent_list = []
     for agent_id, agent in agents.items():
@@ -311,6 +341,8 @@ async def get_agents(include_disabled: bool = False):
     return agent_list
 
 @app.post("/agents", response_model=AgentInfo)
+@require_permission(Permission.CREATE_AGENTS)
+@audit_action("create", "agent")
 async def create_agent(
     name: str = Form(...),
     agent_type: str = Form(...),
@@ -319,7 +351,8 @@ async def create_agent(
     reports_to_agent_id: str = Form(None),
     specialization: str = Form(...),
     model: str = Form("gpt-4o-mini"),
-    responsibilities_doc: Optional[UploadFile] = File(None)
+    responsibilities_doc: Optional[UploadFile] = File(None),
+    current_user: dict = Depends(get_current_user)
 ):
     """Create a new AI agent with optional document upload for responsibilities and direct reporting relationship"""
     
@@ -513,7 +546,9 @@ Be professional, knowledgeable, and helpful in all interactions."""
         raise HTTPException(status_code=500, detail=f"Failed to create agent: {str(e)}")
 
 @app.put("/agents/{agent_id}")
-async def update_agent(agent_id: str, request: UpdateAgentRequest):
+@require_permission(Permission.UPDATE_AGENTS)
+@audit_action("update", "agent")
+async def update_agent(agent_id: str, request: UpdateAgentRequest, current_user: dict = Depends(get_current_user)):
     """Update an existing agent"""
     try:
         if agent_id not in agents:
@@ -567,7 +602,9 @@ async def update_agent(agent_id: str, request: UpdateAgentRequest):
         raise HTTPException(status_code=500, detail=f"Failed to update agent: {str(e)}")
 
 @app.delete("/agents/{agent_id}")
-async def delete_agent(agent_id: str):
+@require_permission(Permission.DELETE_AGENTS)
+@audit_action("delete", "agent")
+async def delete_agent(agent_id: str, current_user: dict = Depends(get_current_user)):
     """Delete an agent"""
     try:
         if agent_id not in agents:
@@ -590,7 +627,9 @@ async def delete_agent(agent_id: str):
         raise HTTPException(status_code=500, detail=f"Failed to delete agent: {str(e)}")
 
 @app.post("/agents/{agent_id}/enable")
-async def enable_agent(agent_id: str):
+@require_permission(Permission.UPDATE_AGENTS)
+@audit_action("enable", "agent")
+async def enable_agent(agent_id: str, current_user: dict = Depends(get_current_user)):
     """Enable an agent"""
     if agent_id not in agents:
         raise HTTPException(status_code=404, detail=f"Agent '{agent_id}' not found")
@@ -601,7 +640,9 @@ async def enable_agent(agent_id: str):
     return {"message": "Agent enabled", "agent_id": agent_id, "enabled": True}
 
 @app.post("/agents/{agent_id}/disable")
-async def disable_agent(agent_id: str):
+@require_permission(Permission.UPDATE_AGENTS)
+@audit_action("disable", "agent")
+async def disable_agent(agent_id: str, current_user: dict = Depends(get_current_user)):
     """Disable an agent"""
     if agent_id not in agents:
         raise HTTPException(status_code=404, detail=f"Agent '{agent_id}' not found")
@@ -614,14 +655,17 @@ async def disable_agent(agent_id: str):
 # Role Management Endpoints
 
 @app.get("/roles")
-async def get_roles(include_disabled: bool = False):
+@require_permission(Permission.VIEW_ROLES)
+async def get_roles(include_disabled: bool = False, current_user: dict = Depends(get_current_user)):
     """Get list of available roles"""
     if include_disabled:
         return list(custom_roles.values())
     return [role for role in custom_roles.values() if role.enabled]
 
 @app.post("/roles")
-async def create_role(role: RoleDefinition):
+@require_permission(Permission.CREATE_ROLES)
+@audit_action("create", "role")
+async def create_role(role: RoleDefinition, current_user: dict = Depends(get_current_user)):
     """Create a new custom role"""
     if role.role_id in custom_roles:
         raise HTTPException(status_code=400, detail=f"Role '{role.role_id}' already exists")
@@ -632,7 +676,9 @@ async def create_role(role: RoleDefinition):
     return role
 
 @app.put("/roles/{role_id}")
-async def update_role(role_id: str, role: RoleDefinition):
+@require_permission(Permission.UPDATE_ROLES)
+@audit_action("update", "role")
+async def update_role(role_id: str, role: RoleDefinition, current_user: dict = Depends(get_current_user)):
     """Update an existing role"""
     if role_id not in custom_roles:
         raise HTTPException(status_code=404, detail=f"Role '{role_id}' not found")
@@ -643,7 +689,9 @@ async def update_role(role_id: str, role: RoleDefinition):
     return role
 
 @app.delete("/roles/{role_id}")
-async def delete_role(role_id: str):
+@require_permission(Permission.DELETE_ROLES)
+@audit_action("delete", "role")
+async def delete_role(role_id: str, current_user: dict = Depends(get_current_user)):
     """Delete a role"""
     if role_id not in custom_roles:
         raise HTTPException(status_code=404, detail=f"Role '{role_id}' not found")
@@ -667,7 +715,9 @@ async def delete_role(role_id: str):
     return {"message": f"Role '{role_name}' deleted successfully", "role_id": role_id}
 
 @app.post("/roles/{role_id}/enable")
-async def enable_role(role_id: str):
+@require_permission(Permission.UPDATE_ROLES)
+@audit_action("enable", "role")
+async def enable_role(role_id: str, current_user: dict = Depends(get_current_user)):
     """Enable a role"""
     if role_id not in custom_roles:
         raise HTTPException(status_code=404, detail=f"Role '{role_id}' not found")
@@ -678,7 +728,9 @@ async def enable_role(role_id: str):
     return {"message": "Role enabled", "role_id": role_id, "enabled": True}
 
 @app.post("/roles/{role_id}/disable")
-async def disable_role(role_id: str):
+@require_permission(Permission.UPDATE_ROLES)
+@audit_action("disable", "role")
+async def disable_role(role_id: str, current_user: dict = Depends(get_current_user)):
     """Disable a role"""
     if role_id not in custom_roles:
         raise HTTPException(status_code=404, detail=f"Role '{role_id}' not found")
@@ -690,7 +742,8 @@ async def disable_role(role_id: str):
 
 # API v1 endpoints for enhanced/basic dashboards
 @app.get("/api/v1/dashboard/kpis")
-async def get_dashboard_kpis():
+@require_permission(Permission.VIEW_KPI)
+async def get_dashboard_kpis(current_user: dict = Depends(get_current_user)):
     """Get dashboard KPIs for enhanced/basic dashboards"""
     total_messages = len(blockchain_logger.local_blockchain)
     
@@ -704,7 +757,8 @@ async def get_dashboard_kpis():
     }
 
 @app.get("/api/v1/agents/hierarchy")
-async def get_agents_hierarchy():
+@require_permission(Permission.VIEW_AGENTS)
+async def get_agents_hierarchy(current_user: dict = Depends(get_current_user)):
     """Get agent hierarchy for visualization with reporting relationships"""
     hierarchy = {
         "ceo": [],
@@ -752,7 +806,8 @@ async def get_agents_hierarchy():
     return hierarchy
 
 @app.get("/api/v1/communications/recent")
-async def get_recent_communications():
+@require_permission(Permission.VIEW_COMMUNICATIONS)
+async def get_recent_communications(current_user: dict = Depends(get_current_user)):
     """Get recent communications"""
     recent_blocks = blockchain_logger.export_blockchain()[-10:]
     
@@ -770,7 +825,8 @@ async def get_recent_communications():
     return communications
 
 @app.get("/api/v1/communications/queues")
-async def get_message_queues():
+@require_permission(Permission.VIEW_COMMUNICATIONS)
+async def get_message_queues(current_user: dict = Depends(get_current_user)):
     """Get message queue status for all agents"""
     queues = []
     
@@ -786,7 +842,8 @@ async def get_message_queues():
     return queues
 
 @app.get("/api/v1/blockchain/logs")
-async def get_blockchain_logs(limit: int = 50):
+@require_permission(Permission.VIEW_BLOCKCHAIN)
+async def get_blockchain_logs(limit: int = 50, current_user: dict = Depends(get_current_user)):
     """Get blockchain communication logs"""
     try:
         # Get blockchain entries
@@ -841,7 +898,7 @@ async def get_blockchain_logs(limit: int = 50):
         }
 
 @app.post("/chat", response_model=AgentResponse)
-async def chat_with_agent(chat_message: ChatMessage):
+async def chat_with_agent(chat_message: ChatMessage, current_user: dict = Depends(get_current_user_optional)):
     """Send message to specific agent and get AI-powered response"""
     
     if chat_message.agent_id not in agents:
@@ -910,7 +967,8 @@ async def get_agent_report(agent_id: str):
     return report
 
 @app.get("/blockchain/status")
-async def get_blockchain_status():
+@require_permission(Permission.VIEW_BLOCKCHAIN)
+async def get_blockchain_status(current_user: dict = Depends(get_current_user)):
     """Get blockchain status and recent activity"""
     
     recent_blocks = blockchain_logger.export_blockchain()[-10:]  # Last 10 blocks
@@ -932,7 +990,8 @@ async def get_blockchain_status():
     }
 
 @app.get("/blockchain/compliance-report")
-async def generate_compliance_report():
+@require_permission(Permission.VIEW_BLOCKCHAIN)
+async def generate_compliance_report(current_user: dict = Depends(get_current_user)):
     """Generate blockchain compliance report"""
     
     start_date = datetime.now().replace(hour=0, minute=0, second=0)
@@ -1064,9 +1123,20 @@ async def websocket_chat(websocket: WebSocket):
 # User-facing chatbot endpoint (Pramiti Assistant)
 @app.post("/user-chat")
 async def user_chatbot(chat_message: ChatMessage):
-    """User-facing chatbot that can route to appropriate agents"""
+    """
+    User-facing chatbot that can route to appropriate agents
+    
+    Role-aware routing:
+    - ADMIN/SUPER_ADMIN: Gets technical setup instructions (OAuth, API keys, tenant IDs)
+    - USER: Gets general usage instructions (how to use features)
+    
+    NOTE: This endpoint provides general agent routing and conversation.
+    Does NOT persist to knowledge base (use /api/v1/rag/chat for self-learning).
+    """
     
     message_lower = chat_message.message.lower()
+    user_role = (chat_message.role or "USER").upper()
+    is_admin = user_role in ["ADMIN", "SUPER_ADMIN"]
     
     # Import Setup Assistant to check for active sessions
     from agents.setup_assistant_agent import setup_assistant
@@ -1082,12 +1152,35 @@ async def user_chatbot(chat_message: ChatMessage):
             "routing_reason": "User has active setup session"
         }
     
-    # Check for Setup/Configuration intent (for IT admins)
-    setup_keywords = ['setup', 'configure', 'install', 'set up', 'initialize', 
-                     'credentials', 'client id', 'client secret', 'tenant id',
-                     'oauth setup', 'config', 'integration']
+    # ROLE-BASED ROUTING: Admins asking about Microsoft, Google, OAuth, setup -> Technical Setup
+    # Check for admin-level setup/integration requests
+    integration_keywords = ['microsoft', 'google', 'slack', 'jira', 'confluence', 'oauth', 
+                           'office 365', 'o365', 'gmail', 'workspace', 'azure', 'teams']
+    setup_intent_keywords = ['set up', 'setup', 'configure', 'install', 'integrate', 
+                            'connect', 'enable', 'how do i', 'how to']
     
-    if any(word in message_lower for word in setup_keywords):
+    has_integration_keyword = any(keyword in message_lower for keyword in integration_keywords)
+    has_setup_intent = any(keyword in message_lower for keyword in setup_intent_keywords)
+    
+    # If ADMIN and asking about integration/setup -> Route to Setup Assistant
+    if is_admin and has_integration_keyword and has_setup_intent:
+        response_text = setup_assistant.handle_chat_message(chat_message.message, chat_message.user_id)
+        
+        return {
+            "response": response_text,
+            "agent": "Setup Assistant",
+            "routed_to": "Setup Assistant",
+            "routing_reason": f"Admin user requesting technical setup/integration guidance ({user_role})"
+        }
+    
+    # Explicit technical setup requests (regardless of role if very specific)
+    setup_keywords = ['client id', 'client secret', 'tenant id', 'api key', 'credentials', 'oauth setup']
+    explicit_setup_phrases = ['configure credentials', 'setup oauth', 'register application']
+    
+    has_setup_keyword = any(keyword in message_lower for keyword in setup_keywords)
+    has_explicit_setup = any(phrase in message_lower for phrase in explicit_setup_phrases)
+    
+    if has_setup_keyword or has_explicit_setup:
         # Route to Setup Assistant
         response_text = setup_assistant.handle_chat_message(chat_message.message, chat_message.user_id)
         
@@ -1095,16 +1188,15 @@ async def user_chatbot(chat_message: ChatMessage):
             "response": response_text,
             "agent": "Setup Assistant",
             "routed_to": "Setup Assistant",
-            "routing_reason": "Message contained setup/configuration keywords"
+            "routing_reason": "Message contained explicit technical setup keywords"
         }
     
-    # Check for OAuth/authentication intent (for end users)
-    oauth_keywords = ['login', 'sign in', 'signin', 'authenticate', 'connect', 'auth',
-                     'microsoft', 'google', 'outlook', 'gmail', 'office 365', 'o365',
-                     'onedrive', 'calendar', 'account', 'access', 'email setup',
-                     'permission', 'authorize', 'token', 'oauth']
+    # Only route to OAuth assistant for end-user authentication (not admin setup)
+    # Regular users asking "how do I connect my account" -> OAuth assistant
+    oauth_user_keywords = ['connect my account', 'link my account', 'authorize access', 
+                          'grant permission', 'authenticate myself']
     
-    if any(word in message_lower for word in oauth_keywords):
+    if not is_admin and any(keyword in message_lower for keyword in oauth_user_keywords):
         # Route to OAuth assistant
         from agents.oauth_agent import oauth_assistant
         
@@ -1281,7 +1373,218 @@ GOOGLE_CLIENT_SECRET=your_client_secret_here
     response_dict["routed_to"] = agents[target_agent_id].name
     response_dict["routing_reason"] = f"Message contained keywords suggesting {agents[target_agent_id].specialization}"
     
+    # Store conversation in RAG knowledge base for learning
+    # Extract org_id from user_id (format: user_id@org_id or just user_id)
+    org_id = chat_message.user_id.split("@")[-1] if "@" in chat_message.user_id else "default_org"
+    
+    try:
+        # Generate conversation ID from session or create new one
+        conversation_id = chat_message.session_id or f"conv_{int(datetime.utcnow().timestamp())}"
+        
+        # Store the conversation for RAG learning
+        doc_id = rag_knowledge_base.store_conversation(
+            org_id=org_id,
+            user_id=chat_message.user_id,
+            user_message=chat_message.message,
+            ai_response=response_dict["response"],
+            conversation_id=conversation_id,
+            metadata={
+                "agent": response_dict["routed_to"],
+                "routing_reason": response_dict["routing_reason"],
+                "specialization": agents[target_agent_id].specialization
+            }
+        )
+        
+        # Add doc_id to response for feedback collection
+        response_dict["doc_id"] = doc_id
+        response_dict["conversation_id"] = conversation_id
+        response_dict["rag_enabled"] = True
+        
+    except Exception as e:
+        logger.warning(f"Failed to store conversation in RAG: {e}")
+        response_dict["rag_enabled"] = False
+    
     return response_dict
+
+@app.post("/api/v1/tenant/chat")
+@require_permission(Permission.CHAT_WITH_AGENTS)
+async def tenant_chat(chat_message: ChatMessage, current_user: dict = Depends(get_current_user)):
+    """
+    Tenant-specific chat endpoint with:
+    - Only master agents visible (no subordinates)
+    - Tenant-isolated chat history
+    - Chat logging per org_id
+    """
+    try:
+        org_id = current_user["org_id"]
+        user_id = current_user["user_id"]
+        
+        # Get master agents only (top-level agents without reporting managers)
+        master_agents = {
+            agent_id: agent 
+            for agent_id, agent in agents.items() 
+            if not hasattr(agent, 'reporting_manager') or not agent.reporting_manager
+        }
+        
+        # If agent_id not specified, route to appropriate master agent
+        if not chat_message.agent_id:
+            message_lower = chat_message.message.lower()
+            
+            # Simple routing logic for master agents
+            if any(word in message_lower for word in ["incident", "outage", "down", "broken", "error", "issue"]):
+                # Route to incident manager
+                target_agent_id = "manager-incident-001"
+            elif any(word in message_lower for word in ["change", "update", "upgrade"]):
+                # Route to change manager
+                target_agent_id = "manager-change-001"
+            elif any(word in message_lower for word in ["problem", "analysis"]):
+                # Route to problem manager
+                target_agent_id = "manager-problem-001"
+            else:
+                # Default to CEO/org head
+                target_agent_id = "ceo-001"
+            
+            chat_message.agent_id = target_agent_id
+        
+        # Verify agent exists and is a master agent
+        if chat_message.agent_id not in master_agents:
+            raise HTTPException(
+                status_code=404, 
+                detail="Agent not found or is a subordinate agent"
+            )
+        
+        # Process the message
+        agent = master_agents[chat_message.agent_id]
+        
+        user_message = Message(
+            sender_id=user_id,
+            recipient_id=chat_message.agent_id,
+            message_type=MessageType.REQUEST,
+            content={"text": chat_message.message},
+            metadata={"org_id": org_id, "session_id": chat_message.session_id}
+        )
+        
+        response_message = await agent.process_message(user_message)
+        
+        # Log chat to tenant-specific file
+        chat_log_dir = Path(f"logs/chats/{org_id}")
+        chat_log_dir.mkdir(parents=True, exist_ok=True)
+        
+        chat_log_file = chat_log_dir / f"{datetime.now().strftime('%Y-%m-%d')}.jsonl"
+        with open(chat_log_file, 'a') as f:
+            log_entry = {
+                "timestamp": datetime.now().isoformat(),
+                "org_id": org_id,
+                "user_id": user_id,
+                "agent_id": chat_message.agent_id,
+                "agent_name": agent.name,
+                "user_message": chat_message.message,
+                "agent_response": response_message.content.get("response", ""),
+                "session_id": chat_message.session_id
+            }
+            f.write(json.dumps(log_entry) + '\n')
+        
+        return {
+            "agent_id": chat_message.agent_id,
+            "agent_name": agent.name,
+            "response": response_message.content.get("response", "No response"),
+            "timestamp": response_message.timestamp.isoformat(),
+            "blockchain_hash": response_message.blockchain_entry.get("hash") if response_message.blockchain_entry else None,
+            "block_number": response_message.blockchain_entry.get("block_number") if response_message.blockchain_entry else None,
+            "org_id": org_id
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in tenant chat: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v1/tenant/chat/history")
+@require_permission(Permission.VIEW_CHAT_HISTORY)
+async def get_tenant_chat_history(
+    current_user: dict = Depends(get_current_user),
+    date: str = None,
+    limit: int = 100
+):
+    """
+    Get chat history for the tenant
+    Admin can see all chats, users see only their own
+    """
+    try:
+        org_id = current_user["org_id"]
+        user_id = current_user["user_id"]
+        role = current_user["role"]
+        
+        chat_log_dir = Path(f"logs/chats/{org_id}")
+        
+        if not chat_log_dir.exists():
+            return {"chats": [], "total": 0}
+        
+        # Determine which file to read
+        if date:
+            log_file = chat_log_dir / f"{date}.jsonl"
+            files_to_read = [log_file] if log_file.exists() else []
+        else:
+            # Read today's file
+            log_file = chat_log_dir / f"{datetime.now().strftime('%Y-%m-%d')}.jsonl"
+            files_to_read = [log_file] if log_file.exists() else []
+        
+        chats = []
+        for file_path in files_to_read:
+            with open(file_path, 'r') as f:
+                for line in f:
+                    chat = json.loads(line.strip())
+                    
+                    # Filter: admins see all, users see only their own
+                    if role == 'admin' or role == 'super_admin' or chat['user_id'] == user_id:
+                        chats.append(chat)
+        
+        # Sort by timestamp descending and limit
+        chats.sort(key=lambda x: x['timestamp'], reverse=True)
+        chats = chats[:limit]
+        
+        return {
+            "chats": chats,
+            "total": len(chats),
+            "org_id": org_id
+        }
+        
+    except Exception as e:
+        logger.error(f"Error fetching chat history: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v1/tenant/agents/master")
+async def get_master_agents(current_user: dict = Depends(get_current_user)):
+    """
+    Get only master agents (no subordinates) for tenant chat interface
+    """
+    try:
+        # Filter to master agents only
+        master_agents = []
+        for agent_id, agent in agents.items():
+            # Check if agent has no reporting manager (is a master/top-level agent)
+            if not hasattr(agent, 'reporting_manager') or not agent.reporting_manager:
+                master_agents.append({
+                    "agent_id": agent_id,
+                    "name": agent.name,
+                    "role": agent.role,
+                    "specialization": agent.specialization,
+                    "status": "online"
+                })
+        
+        return {
+            "agents": master_agents,
+            "total": len(master_agents),
+            "org_id": current_user["org_id"]
+        }
+        
+    except Exception as e:
+        logger.error(f"Error fetching master agents: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 # ===== TICKET MANAGEMENT ENDPOINTS =====
 
@@ -1289,18 +1592,22 @@ GOOGLE_CLIENT_SECRET=your_client_secret_here
 tickets_db = []
 
 @app.get("/api/v1/tickets")
-async def get_tickets():
+@require_permission(Permission.VIEW_TICKETS)
+async def get_tickets(current_user: dict = Depends(get_current_user)):
     """Get all tickets"""
     return tickets_db
 
 @app.post("/api/v1/tickets")
-async def create_ticket(ticket: dict):
+@require_permission(Permission.CREATE_TICKETS)
+@audit_action("create", "ticket")
+async def create_ticket(ticket: dict, current_user: dict = Depends(get_current_user)):
     """Create a new ticket"""
     tickets_db.append(ticket)
     return ticket
 
 @app.get("/api/v1/tickets/{ticket_id}")
-async def get_ticket(ticket_id: str):
+@require_permission(Permission.VIEW_TICKETS)
+async def get_ticket(ticket_id: str, current_user: dict = Depends(get_current_user)):
     """Get a specific ticket"""
     ticket = next((t for t in tickets_db if t.get('id') == ticket_id), None)
     if not ticket:
@@ -1308,7 +1615,9 @@ async def get_ticket(ticket_id: str):
     return ticket
 
 @app.put("/api/v1/tickets/{ticket_id}")
-async def update_ticket(ticket_id: str, updates: dict):
+@require_permission(Permission.UPDATE_TICKETS)
+@audit_action("update", "ticket")
+async def update_ticket(ticket_id: str, updates: dict, current_user: dict = Depends(get_current_user)):
     """Update a ticket"""
     ticket = next((t for t in tickets_db if t.get('id') == ticket_id), None)
     if not ticket:
@@ -1322,7 +1631,9 @@ async def update_ticket(ticket_id: str, updates: dict):
     return ticket
 
 @app.delete("/api/v1/tickets/{ticket_id}")
-async def delete_ticket(ticket_id: str):
+@require_permission(Permission.DELETE_TICKETS)
+@audit_action("delete", "ticket")
+async def delete_ticket(ticket_id: str, current_user: dict = Depends(get_current_user)):
     """Delete a ticket"""
     global tickets_db
     ticket = next((t for t in tickets_db if t.get('id') == ticket_id), None)
@@ -1338,11 +1649,14 @@ async def delete_ticket(ticket_id: str):
 archives_db = []
 
 @app.get("/api/v1/archives")
-async def get_archives():
+@require_permission(Permission.VIEW_ARCHIVES)
+async def get_archives(current_user: dict = Depends(get_current_user)):
     """Get all archived documents"""
     return archives_db
 
 @app.post("/api/v1/archives")
+@require_permission(Permission.MANAGE_ARCHIVES)
+@audit_action("upload", "archive")
 async def upload_archive(
     title: str = Form(...),
     description: str = Form(None),
@@ -1350,7 +1664,8 @@ async def upload_archive(
     department: str = Form(None),
     tags: str = Form(None),
     searchable: bool = Form(True),
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user)
 ):
     """Upload a new document to archives"""
     import os
@@ -1649,7 +1964,8 @@ class ConnectorUpdateRequest(BaseModel):
     status: Optional[str] = None
 
 @app.get("/api/v1/connectors/available")
-async def get_available_connectors():
+@require_permission(Permission.VIEW_CONNECTORS)
+async def get_available_connectors(current_user: dict = Depends(get_current_user)):
     """Get list of all available standard connectors"""
     try:
         connectors = []
@@ -1673,7 +1989,8 @@ async def get_available_connectors():
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/v1/connectors")
-async def list_connectors(tenant_id: Optional[str] = None):
+@require_permission(Permission.VIEW_CONNECTORS)
+async def list_connectors(tenant_id: Optional[str] = None, current_user: dict = Depends(get_current_user)):
     """List all configured connectors"""
     try:
         connectors = connector_manager.list_connectors(tenant_id)
@@ -1702,7 +2019,9 @@ async def list_connectors(tenant_id: Optional[str] = None):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/v1/connectors")
-async def create_connector(request: ConnectorCreateRequest):
+@require_permission(Permission.MANAGE_CONNECTORS)
+@audit_action("create", "connector")
+async def create_connector(request: ConnectorCreateRequest, current_user: dict = Depends(get_current_user)):
     """Create a new connector"""
     try:
         # Validate connector type
@@ -1745,6 +2064,49 @@ async def create_connector(request: ConnectorCreateRequest):
     except Exception as e:
         logger.error(f"Error creating connector: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# Multi-tenant connector query endpoints (must be before catch-all {connector_id} route)
+@app.get("/api/v1/connectors/configured")
+async def get_configured_connectors(current_user: dict = Depends(get_current_user)):
+    """
+    Get list of configured connectors for user's organization
+    """
+    try:
+        org_id = current_user["org_id"]
+        connectors = mt_connector_manager.get_configured_connectors(org_id)
+        
+        return {
+            "success": True,
+            "org_id": org_id,
+            "connectors": connectors,
+            "total": len(connectors)
+        }
+    except Exception as e:
+        logger.error(f"Error getting configured connectors: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v1/connectors/user/authorized")
+async def get_user_authorized_connectors(current_user: dict = Depends(get_current_user)):
+    """
+    Get list of connectors authorized by the current user
+    """
+    try:
+        org_id = current_user["org_id"]
+        user_id = current_user["user_id"]
+        connectors = mt_connector_manager.get_user_connectors(org_id, user_id)
+        
+        return {
+            "success": True,
+            "org_id": org_id,
+            "user_id": user_id,
+            "connectors": connectors,
+            "total": len(connectors)
+        }
+    except Exception as e:
+        logger.error(f"Error getting user authorized connectors: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.get("/api/v1/connectors/{connector_id}")
 async def get_connector(connector_id: str):
@@ -2141,7 +2503,8 @@ async def drive_upload_file(connector_id: str, request: dict):
 # ============================================================================
 
 @app.get("/api/v1/oauth/authorize/{connector_id}")
-async def oauth_authorize(connector_id: str):
+@require_permission(Permission.SETUP_OAUTH)
+async def oauth_authorize(connector_id: str, current_user: dict = Depends(get_current_user)):
     """
     Step 1: Generate OAuth authorization URL for user login
     
@@ -2347,7 +2710,8 @@ async def oauth_callback(code: Optional[str] = None, state: Optional[str] = None
 
 
 @app.get("/api/v1/oauth/status/{connector_id}")
-async def oauth_status(connector_id: str):
+@require_permission(Permission.VIEW_CONNECTORS)
+async def oauth_status(connector_id: str, current_user: dict = Depends(get_current_user)):
     """Check OAuth authentication status for a connector"""
     try:
         from core.oauth_manager import oauth_token_manager
@@ -2521,6 +2885,719 @@ async def upload_onedrive_file(connector_id: str, file_data: dict):
         raise
     except Exception as e:
         logger.error(f"Error uploading to OneDrive: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==================== OAuth Setup Endpoints ====================
+
+@app.post("/api/v1/auth/login")
+async def login(request: dict):
+    """
+    User login endpoint
+    
+    Returns JWT token for multi-tenant access
+    
+    Request body:
+    {
+        "user_id": "admin@default.com",
+        "password": "password"
+    }
+    """
+    try:
+        user_id = request.get("user_id", "").strip()
+        password = request.get("password", "").strip()
+        
+        if not user_id or not password:
+            raise HTTPException(status_code=400, detail="Missing user_id or password")
+        
+        user = session_manager.authenticate_user(user_id, password)
+        
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        token = session_manager.create_token(
+            user_id=user["user_id"],
+            org_id=user["org_id"],
+            role=user["role"]
+        )
+        
+        return {
+            "success": True,
+            "token": token,
+            "user": user
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Login error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==================== RAG Knowledge Base Endpoints ====================
+
+@app.post("/api/v1/rag/chat")
+async def rag_chat(request: dict, current_user: dict = Depends(get_current_user)):
+    """
+    Chat with RAG-enhanced AI that learns from interactions
+    
+    TENANT ISOLATION & CONFIDENTIALITY:
+    - Each organization has its own isolated knowledge base (ChromaDB collection)
+    - Authenticated users can only access their organization's knowledge base
+    - Cross-tenant data leakage is prevented at the storage layer
+    - Knowledge base collections are named: kb_{org_id}
+    - Authentication required to maintain proper tenant isolation
+    
+    Request body:
+    {
+        "message": "How do I configure Slack integration?",
+        "conversation_id": "conv_12345" (optional)
+    }
+    """
+    try:
+        user_message = request.get("message", "").strip()
+        conversation_id = request.get("conversation_id", f"conv_{datetime.utcnow().timestamp()}")
+        
+        if not user_message:
+            raise HTTPException(status_code=400, detail="Message is required")
+        
+        # Extract tenant info (isolated per organization)
+        org_id = current_user["org_id"]  # Each org has isolated knowledge base
+        user_id = current_user["user_id"]
+        user_role = current_user.get("role", "user").upper()
+        is_admin = user_role in ["ADMIN", "SUPER_ADMIN"]
+        
+        # Log for audit trail (optional - can be disabled for anonymous users)
+        if user_id != "anonymous":
+            logger.info(f"RAG chat request - org:{org_id}, user:{user_id}, role:{user_role}, conv:{conversation_id}")
+        
+        # Role-aware system prompt for Pramiti AI
+        if is_admin:
+            system_prompt = """You are Pramiti AI, an intelligent assistant for enterprise IT administrators.
+            
+Your role is to provide TECHNICAL SETUP AND CONFIGURATION GUIDANCE for:
+- OAuth application registration (Azure Portal, Google Cloud Console)
+- Client ID, Client Secret, and Tenant ID configuration
+- API key management and permissions setup
+- Integration configuration for Microsoft Teams, Google Workspace, Slack, Jira, etc.
+- Environment variable setup and deployment
+- Troubleshooting authentication and authorization issues
+- Security best practices and compliance requirements
+
+When users ask about Microsoft, Google, Slack, or any integration:
+1. Provide step-by-step technical setup instructions
+2. Include specific portal navigation steps (Azure Portal, Google Cloud Console, etc.)
+3. Explain credential management (where to find Client IDs, how to generate secrets)
+4. Detail required API permissions and scopes
+5. Include code examples for .env configuration
+6. Explain OAuth callback URLs and redirect URIs
+
+Be detailed, technical, and assume the user has admin access to configure services."""
+        else:
+            system_prompt = """You are Pramiti AI, an intelligent assistant for enterprise users.
+
+Your role is to help users USE FEATURES and understand capabilities:
+- How to use existing integrations (not configure them)
+- Connecting personal accounts via OAuth (user-level authentication)
+- Creating tickets, incidents, and service requests
+- Using collaboration features
+- Understanding available tools and workflows
+- Troubleshooting user-level issues
+
+When users ask about Microsoft, Google, or integrations:
+1. Explain how to USE the integration (not set it up)
+2. Guide them through personal account connection (OAuth flow)
+3. Show them available features and capabilities
+4. Help with day-to-day usage questions
+
+Do NOT provide technical setup instructions like Client IDs or admin configuration.
+If they need admin-level setup, direct them to contact their IT administrator."""
+        
+        # Generate response using RAG (tenant-isolated via org_id)
+        # Each org_id maps to separate ChromaDB collection: kb_{org_id}
+        ai_response, metadata = rag_knowledge_base.generate_rag_response(
+            org_id=org_id,  # Ensures tenant isolation
+            user_id=user_id,
+            user_message=user_message,
+            base_prompt=system_prompt,
+            conversation_id=conversation_id
+        )
+        
+        return {
+            "success": True,
+            "conversation_id": conversation_id,
+            "message": ai_response,
+            "metadata": {
+                "context_used": metadata.get("context_used", False),
+                "context_length": metadata.get("context_length", 0),
+                "model": metadata.get("model", "gpt-4-turbo-preview"),
+                "learning_enabled": True
+            }
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"RAG chat error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/rag/feedback")
+async def record_feedback(request: dict, current_user: dict = Depends(get_current_user)):
+    """
+    Record user feedback for AI response (enables self-learning)
+    
+    TENANT ISOLATION:
+    - Feedback is stored per organization (org_id)
+    - Only affects the organization's own knowledge base
+    - Cannot influence other tenants' AI responses
+    - Authentication required to maintain tenant isolation
+    
+    Request body:
+    {
+        "doc_id": "abc123def456",
+        "rating": 1,  // -1 = thumbs down, 0 = neutral, 1 = thumbs up
+        "feedback_text": "This was very helpful!" (optional)
+    }
+    """
+    try:
+        doc_id = request.get("doc_id", "").strip()
+        rating = request.get("rating", 0)
+        feedback_text = request.get("feedback_text")
+        
+        if not doc_id:
+            raise HTTPException(status_code=400, detail="doc_id is required")
+        
+        if rating not in [-1, 0, 1]:
+            raise HTTPException(status_code=400, detail="rating must be -1, 0, or 1")
+        
+        # Record feedback (tenant-isolated via org_id)
+        rag_knowledge_base.record_feedback(
+            org_id=current_user["org_id"],  # Ensures tenant isolation
+            doc_id=doc_id,
+            user_id=current_user["user_id"],
+            rating=rating,
+            feedback_text=feedback_text
+        )
+        
+        return {
+            "success": True,
+            "message": "Feedback recorded successfully",
+            "doc_id": doc_id,
+            "rating": rating
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Feedback recording error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v1/rag/search")
+async def search_knowledge_base(
+    query: str,
+    top_k: int = 5,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Search organization's knowledge base for similar conversations
+    
+    TENANT ISOLATION:
+    - Only searches within the user's organization knowledge base
+    - Authentication required to maintain tenant isolation
+    
+    Query params:
+    - query: Search query
+    - top_k: Number of results (default: 5)
+    """
+    try:
+        if not query:
+            raise HTTPException(status_code=400, detail="query parameter is required")
+        
+        # Search similar conversations
+        results = rag_knowledge_base.search_similar_conversations(
+            org_id=current_user["org_id"],
+            query=query,
+            top_k=top_k,
+            min_rating=None  # Include all
+        )
+        
+        return {
+            "success": True,
+            "query": query,
+            "results_count": len(results),
+            "results": results
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Knowledge base search error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v1/rag/stats")
+async def get_learning_stats(current_user: dict = Depends(get_current_user)):
+    """
+    Get learning statistics for organization
+    
+    TENANT ISOLATION:
+    - Only returns stats for the user's organization
+    - Authentication required to maintain tenant isolation
+    
+    Returns conversation count, feedback stats, satisfaction rate, etc.
+    """
+    try:
+        stats = rag_knowledge_base.get_learning_stats(current_user["org_id"])
+        
+        return {
+            "success": True,
+            "stats": stats
+        }
+    
+    except Exception as e:
+        logger.error(f"Error getting learning stats: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/v1/rag/conversations/{conversation_id}")
+@require_permission(Permission.VIEW_CHAT_HISTORY)
+async def get_conversation_history(
+    conversation_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Get full conversation history by ID
+    """
+    try:
+        org_id = current_user["org_id"]
+        conv_file = Path(f"data/rag/conversations/{org_id}/{conversation_id}.json")
+        
+        if not conv_file.exists():
+            raise HTTPException(status_code=404, detail="Conversation not found")
+        
+        with open(conv_file, 'r') as f:
+            conversation = json.load(f)
+        
+        # Verify org access
+        if conversation.get("org_id") != org_id:
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        return {
+            "success": True,
+            "conversation": conversation
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting conversation: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.delete("/api/v1/rag/conversations/{conversation_id}")
+async def delete_conversation(
+    conversation_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """
+    Delete conversation (GDPR right to erasure)
+    """
+    try:
+        # Require admin role for deletion
+        session_manager.require_admin(current_user)
+        
+        org_id = current_user["org_id"]
+        conv_file = Path(f"data/rag/conversations/{org_id}/{conversation_id}.json")
+        
+        if conv_file.exists():
+            conv_file.unlink()
+        
+        # TODO: Also remove from vector database
+        
+        return {
+            "success": True,
+            "message": f"Conversation {conversation_id} deleted"
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting conversation: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/oauth/setup/microsoft")
+@require_permission(Permission.SETUP_OAUTH)
+@audit_action("setup_oauth", "microsoft")
+async def setup_microsoft_oauth(request: dict, current_user: dict = Depends(get_current_user)):
+    """
+    Setup Microsoft 365 OAuth credentials
+    
+    Request body:
+    {
+        "client_id": "12345678-abcd-1234-5678-123456789abc",
+        "client_secret": "your_secret",
+        "tenant_id": "87654321-dcba-4321-4321-cba987654321",
+        "org_id": "default"
+    }
+    """
+    try:
+        from agents.setup_assistant_agent import setup_assistant
+        
+        client_id = request.get("client_id", "").strip()
+        client_secret = request.get("client_secret", "").strip()
+        tenant_id = request.get("tenant_id", "").strip()
+        org_id = request.get("org_id", "default").strip()
+        
+        if not all([client_id, client_secret, tenant_id]):
+            raise HTTPException(status_code=400, detail="Missing required fields")
+        
+        # Validate GUID format
+        import re
+        guid_pattern = r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        
+        if not re.match(guid_pattern, client_id):
+            raise HTTPException(status_code=400, detail="Invalid Client ID format (must be GUID)")
+        
+        if not (re.match(guid_pattern, tenant_id) or tenant_id.lower() == 'common'):
+            raise HTTPException(status_code=400, detail="Invalid Tenant ID format (must be GUID or 'common')")
+        
+        # Save configuration using setup assistant
+        success = setup_assistant._save_microsoft_config(org_id, client_id, client_secret, tenant_id)
+        
+        if success:
+            return {
+                "success": True,
+                "message": "Microsoft 365 OAuth configured successfully",
+                "org_id": org_id,
+                "config_file": f"config/oauth/microsoft_{org_id}.json"
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Failed to save configuration")
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error setting up Microsoft OAuth: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/oauth/setup/google")
+@require_permission(Permission.SETUP_OAUTH)
+@audit_action("setup_oauth", "google")
+async def setup_google_oauth(request: dict, current_user: dict = Depends(get_current_user)):
+    """
+    Setup Google Workspace OAuth credentials
+    
+    Request body:
+    {
+        "client_id": "123456789-abc.apps.googleusercontent.com",
+        "client_secret": "GOCSPX-your_secret",
+        "org_id": "default"
+    }
+    """
+    try:
+        from agents.setup_assistant_agent import setup_assistant
+        
+        client_id = request.get("client_id", "").strip()
+        client_secret = request.get("client_secret", "").strip()
+        org_id = request.get("org_id", "default").strip()
+        
+        if not all([client_id, client_secret]):
+            raise HTTPException(status_code=400, detail="Missing required fields")
+        
+        # Validate Google Client ID format
+        if not client_id.endswith('.apps.googleusercontent.com'):
+            raise HTTPException(status_code=400, detail="Invalid Client ID format (must end with .apps.googleusercontent.com)")
+        
+        # Save configuration using setup assistant
+        success = setup_assistant._save_google_config(org_id, client_id, client_secret)
+        
+        if success:
+            return {
+                "success": True,
+                "message": "Google Workspace OAuth configured successfully",
+                "org_id": org_id,
+                "config_file": f"config/oauth/google_{org_id}.json"
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Failed to save configuration")
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error setting up Google OAuth: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/oauth/setup/slack")
+@require_permission(Permission.SETUP_OAUTH)
+@audit_action("setup_oauth", "slack")
+async def setup_slack_oauth(request: dict, current_user: dict = Depends(get_current_user)):
+    """
+    Setup Slack OAuth credentials (multi-tenant)
+    
+    Request body:
+    {
+        "client_id": "123456789012.1234567890123",
+        "client_secret": "abcdef1234567890abcdef1234567890",
+        "org_id": "default"
+    }
+    """
+    try:
+        client_id = request.get("client_id", "").strip()
+        client_secret = request.get("client_secret", "").strip()
+        org_id = request.get("org_id", current_user["org_id"]).strip()
+        
+        # Verify user has access to this org
+        session_manager.verify_org_access(current_user, org_id)
+        
+        if not all([client_id, client_secret]):
+            raise HTTPException(status_code=400, detail="Missing required fields")
+        
+        # Save configuration using multi-tenant connector manager
+        config_file = mt_connector_manager.save_connector_config(
+            provider="slack",
+            org_id=org_id,
+            config={
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "redirect_uri": f"{os.getenv('API_BASE_URL', 'http://localhost:8084')}/api/v1/oauth/callback/slack"
+            }
+        )
+        
+        return {
+            "success": True,
+            "message": "Slack OAuth configured successfully",
+            "org_id": org_id,
+            "config_file": config_file
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error setting up Slack OAuth: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/oauth/setup/jira")
+@require_permission(Permission.SETUP_OAUTH)
+@audit_action("setup_oauth", "jira")
+async def setup_jira_oauth(request: dict, current_user: dict = Depends(get_current_user)):
+    """
+    Setup Jira OAuth credentials (multi-tenant)
+    
+    Request body:
+    {
+        "client_id": "YOUR_JIRA_CLIENT_ID",
+        "client_secret": "YOUR_JIRA_CLIENT_SECRET",
+        "org_id": "default"
+    }
+    """
+    try:
+        client_id = request.get("client_id", "").strip()
+        client_secret = request.get("client_secret", "").strip()
+        org_id = request.get("org_id", current_user["org_id"]).strip()
+        
+        session_manager.verify_org_access(current_user, org_id)
+        
+        if not all([client_id, client_secret]):
+            raise HTTPException(status_code=400, detail="Missing required fields")
+        
+        config_file = mt_connector_manager.save_connector_config(
+            provider="jira",
+            org_id=org_id,
+            config={
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "redirect_uri": f"{os.getenv('API_BASE_URL', 'http://localhost:8084')}/api/v1/oauth/callback/jira"
+            }
+        )
+        
+        return {
+            "success": True,
+            "message": "Jira OAuth configured successfully",
+            "org_id": org_id,
+            "config_file": config_file
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error setting up Jira OAuth: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/oauth/setup/servicenow")
+async def setup_servicenow_oauth(request: dict, current_user: dict = Depends(get_current_user)):
+    """
+    Setup ServiceNow OAuth credentials (multi-tenant)
+    
+    Request body:
+    {
+        "instance_url": "https://yourinstance.service-now.com",
+        "client_id": "YOUR_SERVICENOW_CLIENT_ID",
+        "client_secret": "YOUR_SERVICENOW_CLIENT_SECRET",
+        "org_id": "default"
+    }
+    """
+    try:
+        instance_url = request.get("instance_url", "").strip()
+        client_id = request.get("client_id", "").strip()
+        client_secret = request.get("client_secret", "").strip()
+        org_id = request.get("org_id", current_user["org_id"]).strip()
+        
+        session_manager.verify_org_access(current_user, org_id)
+        
+        if not all([instance_url, client_id, client_secret]):
+            raise HTTPException(status_code=400, detail="Missing required fields")
+        
+        config_file = mt_connector_manager.save_connector_config(
+            provider="servicenow",
+            org_id=org_id,
+            config={
+                "instance_url": instance_url,
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "redirect_uri": f"{os.getenv('API_BASE_URL', 'http://localhost:8084')}/api/v1/oauth/callback/servicenow"
+            }
+        )
+        
+        return {
+            "success": True,
+            "message": "ServiceNow OAuth configured successfully",
+            "org_id": org_id,
+            "config_file": config_file
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error setting up ServiceNow OAuth: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/oauth/setup/confluence")
+async def setup_confluence_oauth(request: dict, current_user: dict = Depends(get_current_user)):
+    """
+    Setup Confluence OAuth credentials (multi-tenant)
+    """
+    try:
+        client_id = request.get("client_id", "").strip()
+        client_secret = request.get("client_secret", "").strip()
+        org_id = request.get("org_id", current_user["org_id"]).strip()
+        
+        session_manager.verify_org_access(current_user, org_id)
+        
+        if not all([client_id, client_secret]):
+            raise HTTPException(status_code=400, detail="Missing required fields")
+        
+        config_file = mt_connector_manager.save_connector_config(
+            provider="confluence",
+            org_id=org_id,
+            config={
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "redirect_uri": f"{os.getenv('API_BASE_URL', 'http://localhost:8084')}/api/v1/oauth/callback/confluence"
+            }
+        )
+        
+        return {
+            "success": True,
+            "message": "Confluence OAuth configured successfully",
+            "org_id": org_id,
+            "config_file": config_file
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error setting up Confluence OAuth: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/oauth/setup/sharepoint")
+async def setup_sharepoint_oauth(request: dict, current_user: dict = Depends(get_current_user)):
+    """
+    Setup SharePoint OAuth credentials (multi-tenant)
+    """
+    try:
+        client_id = request.get("client_id", "").strip()
+        client_secret = request.get("client_secret", "").strip()
+        tenant_id = request.get("tenant_id", "").strip()
+        org_id = request.get("org_id", current_user["org_id"]).strip()
+        
+        session_manager.verify_org_access(current_user, org_id)
+        
+        if not all([client_id, client_secret, tenant_id]):
+            raise HTTPException(status_code=400, detail="Missing required fields")
+        
+        # Validate GUID format
+        import re
+        guid_pattern = r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+        
+        if not re.match(guid_pattern, client_id):
+            raise HTTPException(status_code=400, detail="Invalid Client ID format (must be GUID)")
+        
+        if not (re.match(guid_pattern, tenant_id) or tenant_id.lower() == 'common'):
+            raise HTTPException(status_code=400, detail="Invalid Tenant ID format (must be GUID or 'common')")
+        
+        config_file = mt_connector_manager.save_connector_config(
+            provider="sharepoint",
+            org_id=org_id,
+            config={
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "tenant_id": tenant_id,
+                "redirect_uri": f"{os.getenv('API_BASE_URL', 'http://localhost:8084')}/api/v1/oauth/callback/sharepoint"
+            }
+        )
+        
+        return {
+            "success": True,
+            "message": "SharePoint OAuth configured successfully",
+            "org_id": org_id,
+            "config_file": config_file
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error setting up SharePoint OAuth: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/v1/oauth/setup/github")
+async def setup_github_oauth(request: dict, current_user: dict = Depends(get_current_user)):
+    """
+    Setup GitHub OAuth credentials (multi-tenant)
+    """
+    try:
+        client_id = request.get("client_id", "").strip()
+        client_secret = request.get("client_secret", "").strip()
+        org_id = request.get("org_id", current_user["org_id"]).strip()
+        
+        session_manager.verify_org_access(current_user, org_id)
+        
+        if not all([client_id, client_secret]):
+            raise HTTPException(status_code=400, detail="Missing required fields")
+        
+        config_file = mt_connector_manager.save_connector_config(
+            provider="github",
+            org_id=org_id,
+            config={
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "redirect_uri": f"{os.getenv('API_BASE_URL', 'http://localhost:8084')}/api/v1/oauth/callback/github"
+            }
+        )
+        
+        return {
+            "success": True,
+            "message": "GitHub OAuth configured successfully",
+            "org_id": org_id,
+            "config_file": config_file
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error setting up GitHub OAuth: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
