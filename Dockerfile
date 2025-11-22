@@ -16,18 +16,21 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first (for better caching)
-COPY requirements-minimal.txt .
+COPY requirements.txt .
 
-# Install Python dependencies
+# Install Python dependencies (including ChromaDB for RAG)
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements-minimal.txt
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir chromadb gunicorn
 
 # Copy application code
 COPY . .
 
 # Create non-root user
 RUN useradd -m -u 1000 pramiti && \
-    chown -R pramiti:pramiti /app
+    chown -R pramiti:pramiti /app && \
+    mkdir -p /app/data/rag/chroma /app/data/rag/conversations /app/logs /app/secrets && \
+    chown -R pramiti:pramiti /app/data /app/logs /app/secrets
 
 # Switch to non-root user
 USER pramiti

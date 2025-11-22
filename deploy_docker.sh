@@ -45,20 +45,26 @@ HOST=0.0.0.0
 PORT=8084
 ENVIRONMENT=production
 
-# Security
+# Security (auto-generated secure keys)
 SECRET_KEY=$(openssl rand -hex 32)
-ALLOWED_ORIGINS=http://localhost,https://yourdomain.com
+JWT_SECRET_KEY=$(openssl rand -hex 32)
 
-# Database
-POSTGRES_PASSWORD=$(openssl rand -hex 16)
-DATABASE_URL=postgresql://pramiti_user:\${POSTGRES_PASSWORD}@postgres:5432/pramiti_ai
+# ChromaDB and RAG
+CHROMA_PERSIST_DIRECTORY=/app/data/rag/chroma
+CONVERSATIONS_DIR=/app/data/rag/conversations
 
-# Redis
-REDIS_URL=redis://redis:6379/0
+# OAuth Configuration (optional)
+# MICROSOFT_CLIENT_ID=
+# MICROSOFT_CLIENT_SECRET=
+# MICROSOFT_TENANT_ID=common
+# GOOGLE_CLIENT_ID=
+# GOOGLE_CLIENT_SECRET=
 EOF
     echo -e "${RED}⚠️  Please edit .env file and set your OPENAI_API_KEY${NC}"
     echo "   nano .env"
     read -p "Press Enter after editing .env file..."
+else
+    echo -e "${GREEN}✅ Found existing .env file${NC}"
 fi
 
 # Create required directories

@@ -13,62 +13,28 @@ services:
       - PORT=8084
       - ENVIRONMENT=production
       - SECRET_KEY=${SECRET_KEY}
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
-      - DATABASE_URL=${DATABASE_URL:-}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - CHROMA_PERSIST_DIRECTORY=/app/data/rag/chroma
+      - CONVERSATIONS_DIR=/app/data/rag/conversations
+      - MICROSOFT_CLIENT_ID=${MICROSOFT_CLIENT_ID:-}
+      - MICROSOFT_CLIENT_SECRET=${MICROSOFT_CLIENT_SECRET:-}
+      - MICROSOFT_TENANT_ID=${MICROSOFT_TENANT_ID:-common}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}
     volumes:
-      - ./logs:/var/log/pramiti-ai
+      - ./logs:/app/logs
       - ./data:/app/data
+      - ./secrets:/app/secrets
+      - ./config:/app/config
     restart: unless-stopped
     networks:
       - pramiti-network
-    depends_on:
-      - postgres
-      - redis
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8084/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  # PostgreSQL Database (Optional)
-  postgres:
-    image: postgres:15-alpine
-    container_name: pramiti-postgres
-    environment:
-      - POSTGRES_DB=pramiti_ai
-      - POSTGRES_USER=pramiti_user
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    restart: unless-stopped
-    networks:
-      - pramiti-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pramiti_user"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Redis Cache (Optional)
-  redis:
-    image: redis:7-alpine
-    container_name: pramiti-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    restart: unless-stopped
-    networks:
-      - pramiti-network
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
 
   # Nginx Reverse Proxy
   nginx:
@@ -87,6 +53,35 @@ services:
       - pramiti-network
     depends_on:
       - pramiti-ai
+
+  # PostgreSQL Database (Optional - currently not used)
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: pramiti-postgres
+  #   environment:
+  #     - POSTGRES_DB=pramiti_ai
+  #     - POSTGRES_USER=pramiti_user
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   restart: unless-stopped
+  #   networks:
+  #     - pramiti-network
+
+  # Redis Cache (Optional - currently not used)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: pramiti-redis
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis-data:/data
+  #   restart: unless-stopped
+  #   networks:
+  #     - pramiti-network
+  #   command: redis-server --appendonly yes
 
 volumes:
   postgres-data:
